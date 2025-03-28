@@ -14,7 +14,7 @@ Track expenses, categorize transactions, set budgets, and visualize your financi
 
 ## Features
 
-- Import bank transactions via CSV  
+- Import bank transactions via CSV
 - Interactive dashboard with customizable charts (Chart.js)  
 - Categorize expenses and income  
 - Monthly budgeting per category  
