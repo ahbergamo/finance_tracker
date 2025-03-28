@@ -38,7 +38,9 @@ jobs:
       - name: Package release artifacts
         run: |
           mkdir -p release-assets
-          tar -czvf release-assets/finance-tracker-${{ steps.extract.outputs.version }}.tar.gz docker_portable/Dist/
+          tar -czvf release-assets/finance-tracker-${{ steps.extract.outputs.version }}.tar.gz \
+            docker_portable/docker-compose.yml \
+            docker_portable/.env_default
 
       - name: Create GitHub Release with asset
         uses: softprops/action-gh-release@v1
