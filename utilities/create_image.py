@@ -1,8 +1,0 @@
-import base64
-
-
-data = "PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDMwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgICA8c3R5bGU+CiAgICAgICAgQGltcG9ydCB1cmwoJ2h0dHBzOi8vZm9udHMuZ29vZ2xlYXBpcy5jb20vY3NzMj9mYW1pbHk9T3JiaXRyb246d2dodEA3MDAmZGlzcGxheT1zd2FwJyk7CiAgICAgICAgdGV4dCB7IGZvbnQtZmFtaWx5OiAnT3JiaXRyb24nLCBzYW5zLXNlcmlmOyBmb250LXdlaWdodDogYm9sZDsgZm9udC1zaXplOiA2MHB4OyBmaWxsOiAjMzMzOyB9CiAgICA8L3N0eWxlPgogICAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0ibm9uZSIvPgogICAgPHRleHQgeD0iMTAiIHk9IjcwIj5GUmFja2VyPC90ZXh0Pgo8L3N2Zz4K"  # noqa: E501
-
-# Define the path where you want to save the file
-with open("app/static/images/Fracker.svg", "wb") as f:
-    f.write(base64.b64decode(data))
