@@ -82,7 +82,7 @@ FLASK_CONFIG=config.config.PortableConfig
 
 Use `.env_default` as a starting point.
 
->⚠️**Security Warning**  Never commit `.env`, `.env.prod`, or any file containing credentials, secrets, or keys. Use `.gitignore`, Docker secrets, or environment variables in production.
+>⚠️ **Security Warning**  Never commit `.env`, `.env.prod`, or any file containing credentials, secrets, or keys. Use `.gitignore`, Docker secrets, or environment variables in production.
 
 ---
 
