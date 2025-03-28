@@ -75,3 +75,4 @@ dev_notes.txt
 logs/
 deploy_pi_local.sh
 coverage_html
+utilities/
