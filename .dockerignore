@@ -1,0 +1,48 @@
+# Environment and secrets
+.env
+.env_default
+instance
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+.mypy_cache/
+
+# Virtual environments
+venv/
+env/
+
+# Logs and test output
+*.log
+logs/
+htmlcov/
+coverage_html/
+
+# Dev files & configs
+.vscode/
+.devcontainer/
+.idea/
+.flake8
+pytest.ini
+.ruff_cache/
+
+# Non-prod project files
+dev_notes.txt
+combined_files.txt
+deploy_pi_local.sh
+tests/
+utilities/
+docker/
+docker_portable/
+
+# Optional: Docs and metadata
+# README.md
+# LICENSE
+# CHANGELOG.md
+# CONTRIBUTING.md
+
+# OS-specific files
+.DS_Store

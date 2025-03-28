@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Edit Import Rule{% endblock %}
+{% block content %}
+<div class="container">
+  <h2 class="mb-4">Edit Import Rule</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      <label for="account_type" class="form-label">Account Type</label>
+      <select id="account_type" name="account_type" class="form-select">
+        <option value="">Select Account Type (Leave blank for global rule)</option>
+        {% for acc in account_types %}
+          <option value="{{ acc.name }}" {% if rule.account_type == acc.name %}selected{% endif %}>{{ acc.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-3">
+      {{ form.field_to_match.label(class="form-label") }}
+      {{ form.field_to_match(class="form-control") }}
+      <small class="form-text text-muted">Enter "description" or "category".</small>
+    </div>
+    <div class="mb-3">
+      {{ form.match_pattern.label(class="form-label") }}
+      {{ form.match_pattern(class="form-control") }}
+    </div>
+    <div class="mb-3 form-check">
+      {{ form.is_transfer(class="form-check-input") }}
+      {{ form.is_transfer.label(class="form-check-label") }}
+    </div>
+    <div class="mb-3">
+      <label for="override_category" class="form-label">Override Category</label>
+      <select id="override_category" name="override_category" class="form-select">
+        <option value="">Select Category (optional)</option>
+        {% for category in categories|sort(attribute='name') %}
+          <option value="{{ category.id }}" {% if form.override_category.data == (category.id|string) %}selected{% endif %}>
+            {{ category.name }}
+          </option>
+        {% endfor %}
+        <option value="other" {% if form.override_category.data == "other" %}selected{% endif %}>Other (enter new)</option>
+      </select>
+    </div>
+    <div class="mb-3" id="new-category-div" style="display: none;">
+      <label for="new_category_name" class="form-label">New Category Name</label>
+      <input type="text" class="form-control" id="new_category_name" name="new_category_name" placeholder="Enter new category name">
+    </div>
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+    <a href="{{ url_for('import_rules.index') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+<script src="{{ url_for('static', filename='js/toggle_category.js') }}"></script>
+{% endblock %}

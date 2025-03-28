@@ -1,0 +1,11 @@
+We have been developing a flask application in this projects chat. We have a good application but I want to make some changes.
+
+The application is a personal finance tracker. It allows users to import transactions, review reports/data, and create budgets etc. The users model contains a family name. Each user in the same family can see all the data, to support shared accounts etc.
+
+It runs in a docker container within a pi 5. User the username aaron, IP 192.168.68.66.
+
+I am developing in vscode and we have various tasks to build/run/deploy the app.
+
+I am going to copy full app code base after I am done with my typing. 
+
+Please review in full and provide feedback. I'm going to make this public on my GitHub next so we really need to scurtinize it.

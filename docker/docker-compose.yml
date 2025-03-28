@@ -1,0 +1,44 @@
+services:
+  finance_tracker:
+    container_name: finance_tracker  
+    build: .
+    expose:
+      - "5000"  # only exposed internally
+    environment:
+      FLASK_CONFIG: "${FLASK_CONFIG}"
+      SECRET_KEY: "${SECRET_KEY}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_HOST: "${DB_HOST}"
+      DB_PORT: "${DB_PORT}"
+      DB_NAME: "${DB_NAME}"
+      SSL_CERT_PATH: "${SSL_CERT_PATH}"
+      SSL_KEY_PATH: "${SSL_KEY_PATH}"
+      # Add REDIS_URL pointing to the redis service (using the service name as hostname)
+      REDIS_URL: "redis://redis:6379"
+    volumes:
+      - .:/app
+      - /home/aaron/app_keys/:/certs/
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_proxy
+    ports:
+      - "80:80"    # External HTTP port
+      - "443:443"  # External HTTPS port
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /home/aaron/app_keys/:/etc/nginx/certs/:ro
+    depends_on:
+      - finance_tracker
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped

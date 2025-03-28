@@ -1,0 +1,77 @@
+# macOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon files
+Icon?
+._*
+
+# Windows thumbnail cache files
+Thumbs.db
+
+# Python bytecode and cache
+*.py[cod]
+*$py.class
+__pycache__/
+
+# Virtual environment folders (adjust if using a different folder name)
+env/
+venv/
+ENV/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# Flask instance folder (contains config secrets)
+instance/
+
+# Flask webassets cache
+.webassets-cache/
+
+# Local SQLite test database file
+finance_tracker.db
+
+# VS Code settings folder
+#.vscode/
+.env
+app/cli.py
+combined_files.txt
+dev_notes.txt
+logs/
+deploy_pi_local.sh
+coverage_html

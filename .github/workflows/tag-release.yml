@@ -1,0 +1,51 @@
+name: Tag Release on Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  tag-release:
+    if: startsWith(github.head_ref || github.ref_name, 'release/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # required to access tags and full history
+
+      - name: Extract version from branch name
+        id: extract
+        run: |
+          BRANCH_NAME=$(echo "${GITHUB_REF#refs/heads/}")
+          if [[ "$BRANCH_NAME" =~ release/([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            VERSION="v${BASH_REMATCH[1]}"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "Not a release branch. Skipping."
+            exit 1
+          fi
+
+      - name: Create Git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.extract.outputs.version }}
+          git push origin ${{ steps.extract.outputs.version }}
+
+      - name: Package release artifacts
+        run: |
+          mkdir -p release-assets
+          tar -czvf release-assets/finance-tracker-${{ steps.extract.outputs.version }}.tar.gz docker_portable/Dist/
+  
+      - name: Create GitHub Release with asset
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.extract.outputs.version }}
+          name: "Release ${{ steps.extract.outputs.version }}"
+          body: "Automatic release from merge of `${{ github.ref_name }}` into `main`."
+          files: release-assets/*.tar.gz

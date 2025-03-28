@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Preview Imported Transactions{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Preview Imported Transactions</h2>
+    <div class="text-end">
+      <div>Batch: {{ current_batch }} of {{ total_batches }}</div>
+      <div>Imported: {{ total_imported }} of {{ total_transactions }}</div>
+      <div>Duplicates: {{ total_duplicates }}</div>
+    </div>
+  </div>
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="confirm" value="1">
+    <input type="hidden" name="total_transactions" value="{{ total_transactions }}">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Account Type</th>
+          <th class="min-width-category">Category</th>
+          <th>Duplicate?</th>
+          <th>Force Import</th>
+          <th>Mark as Transfer</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in transactions_data %}
+        <tr>
+          <td>
+            <input type="hidden" name="transactions[{{ loop.index0 }}][tx_date]" value="{{ tx.tx_date }}">
+            {{ tx.tx_date }}
+          </td>
+          <td>
+            <input type="hidden" name="transactions[{{ loop.index0 }}][description]" value="{{ tx.description }}">
+            {{ tx.description }}
+          </td>
+          <td>
+            <input type="hidden" name="transactions[{{ loop.index0 }}][amount]" value="{{ tx.amount }}">
+            ${{ "{:,.2f}".format(tx.amount) }}
+          </td>
+          <td>
+            <input type="hidden" name="transactions[{{ loop.index0 }}][account_id]" value="{{ tx.account_id }}">
+            {{ tx.account_name }}
+          </td>
+          <td>
+            <!-- Dropdown for category selection sorted alphabetically -->
+            <select id="category-select-{{ loop.index0 }}" name="transactions[{{ loop.index0 }}][category_id]"
+              class="form-select" required>
+              <option value="">Select Category</option>
+              {% for category in categories|sort(attribute='name') %}
+              <option value="{{ category.id }}" data-name="{{ category.name }}" {% if category.name==tx.category_field
+                %}selected{% endif %}>
+                {{ category.name }}
+              </option>
+              {% endfor %}
+              <option value="other" {% if tx.category_field not in categories|map(attribute='name' ) %}selected{% endif
+                %}>
+                Other (enter new)
+              </option>
+            </select>
+            <!-- Text input for new category; hidden by default -->
+            <input type="text" id="new-category-{{ loop.index0 }}" name="transactions[{{ loop.index0 }}][new_category]"
+              class="form-control mt-2" placeholder="Enter new category" style="display: none;"
+              value="{% if tx.category_field not in categories|map(attribute='name') %}{{ tx.category_field }}{% endif %}">
+          </td>
+          <td class="text-center">
+            {% if tx.is_duplicate %}
+            <span class="badge bg-warning text-dark">Yes</span>
+            {% else %}
+            <span class="badge bg-success">No</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            {% if tx.is_duplicate %}
+            <input type="checkbox" name="transactions[{{ loop.index0 }}][force_import]" {% if tx.force_import
+              %}checked{% endif %}>
+            {% else %}
+            <input type="checkbox" name="transactions[{{ loop.index0 }}][force_import]" disabled>
+            {% endif %}
+          </td>
+
+          <td class="text-center">
+            <input type="checkbox" name="transactions[{{ loop.index0 }}][is_transfer]" value="on" {% if tx.is_transfer
+              %}checked{% endif %}>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="d-flex justify-content-start gap-2">
+      <button type="submit" name="continue" class="btn btn-primary"
+        title="Import current batch and go to the next page">
+        Import Page
+      </button>
+      <button type="submit" name="import_all" value="1" class="btn btn-primary"
+        title="Import all remaining transactions">
+        Import All
+      </button>
+      <a href="{{ url_for('transactions.import_transactions') }}" class="btn btn-secondary"
+        title="Cancel the import and return to the transactions page">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+<script src="{{ url_for('static', filename='js/toggle_multicategory.js') }}"></script>
+{% endblock %}

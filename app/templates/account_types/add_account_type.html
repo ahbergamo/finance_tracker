@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Add Account Type</h1>
+<div class="mb-3">
+  <label for="predefined-select" class="form-label">Pre-defined Account Type</label>
+  <select id="predefined-select" class="form-select form-select-sm">
+    <option value="">-- Select a pre-defined account type --</option>
+    {% for pre in pre_defined_accounts %}
+    <option value="{{ pre.id }}" data-name="{{ pre.name }}" data-category="{{ pre.category_field }}"
+      data-date="{{ pre.date_field }}" data-amount="{{ pre.amount_field }}"
+      data-description="{{ pre.description_field }}" data-positive="{{ pre.positive_expense|lower }}">
+      {{ pre.name }}
+    </option>
+    {% endfor %}
+  </select>
+</div>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <div class="mb-3">
+    {{ form.name.label(class="form-label") }}
+    {{ form.name(class="form-control form-control-sm") }}
+  </div>
+  <div class="mb-3">
+    {{ form.category_field.label(class="form-label") }}
+    {{ form.category_field(class="form-control form-control-sm") }}
+  </div>
+  <div class="mb-3">
+    {{ form.date_field.label(class="form-label") }}
+    {{ form.date_field(class="form-control form-control-sm") }}
+  </div>
+  <div class="mb-3">
+    {{ form.amount_field.label(class="form-label") }}
+    {{ form.amount_field(class="form-control form-control-sm") }}
+  </div>
+  <div class="mb-3">
+    {{ form.description_field.label(class="form-label") }}
+    {{ form.description_field(class="form-control form-control-sm") }}
+  </div>
+  <div class="form-check mb-3">
+    {{ form.positive_expense(class="form-check-input") }}
+    {{ form.positive_expense.label(class="form-check-label") }}
+  </div>
+  <div>
+    {{ form.submit(class="btn btn-primary") }}
+    <a href="{{ url_for('account_types.index') }}" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+<script>
+  document.getElementById('predefined-select').addEventListener('change', function () {
+    var selectedOption = this.options[this.selectedIndex];
+    if (selectedOption.value) {
+      document.getElementById("{{ form.name.id }}").value = selectedOption.getAttribute('data-name');
+      document.getElementById("{{ form.category_field.id }}").value = selectedOption.getAttribute('data-category');
+      document.getElementById("{{ form.date_field.id }}").value = selectedOption.getAttribute('data-date');
+      document.getElementById("{{ form.amount_field.id }}").value = selectedOption.getAttribute('data-amount');
+      document.getElementById("{{ form.description_field.id }}").value = selectedOption.getAttribute('data-description');
+      var positiveVal = selectedOption.getAttribute('data-positive') === 'true';
+      document.getElementById("{{ form.positive_expense.id }}").checked = positiveVal;
+    } else {
+      document.getElementById("{{ form.name.id }}").value = "";
+      document.getElementById("{{ form.category_field.id }}").value = "";
+      document.getElementById("{{ form.date_field.id }}").value = "";
+      document.getElementById("{{ form.amount_field.id }}").value = "";
+      document.getElementById("{{ form.description_field.id }}").value = "";
+      document.getElementById("{{ form.positive_expense.id }}").checked = false;
+    }
+  });
+</script>
+{% endblock %}

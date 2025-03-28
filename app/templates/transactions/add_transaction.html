@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Add Transaction{% endblock %}
+{% block content %}
+<div class="container">
+  <h2 class="mb-4">Add Transaction</h2>
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="mb-3">
+      <label for="amount" class="form-label">Amount</label>
+      <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <input type="text" class="form-control" id="description" name="description">
+    </div>
+    <div class="mb-3">
+      <label for="category_id" class="form-label">Category</label>
+      <select class="form-select" id="override_category" name="category_id" required>
+        <option value="">Select Category</option>
+        {% for category in categories|sort(attribute='name') %}
+          <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+        <option value="other">Other (enter new)</option>
+      </select>      
+    </div>
+    <div class="mb-3" id="new-category-div" style="display: none;">
+      <label for="new_category_name" class="form-label">New Category Name</label>
+      <input type="text" class="form-control" id="new_category_name" name="new_category_name" placeholder="Enter new category name">
+    </div>
+    <div class="mb-3">
+      <label for="account_id" class="form-label">Account Type</label>
+      <select class="form-select" id="account_id" name="account_id" required>
+        <option value="">Select Account Type</option>
+        {% for acc in account_types %}
+          <option value="{{ acc.id }}">{{ acc.name }}</option>
+        {% endfor %}
+      </select>      
+    </div>
+    <button type="submit" class="btn btn-primary">Add Transaction</button>
+    <a href="{{ url_for('transactions.transactions') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+<script src="{{ url_for('static', filename='js/toggle_category.js') }}"></script>
+{% endblock %}

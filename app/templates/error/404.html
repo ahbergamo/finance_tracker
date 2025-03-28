@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+<div class="text-center">
+  <h1 class="display-4">404</h1>
+  <p class="lead">Sorry, the page you're looking for cannot be found.</p>
+  {% if current_user.is_authenticated %}
+    <a class="btn btn-primary" href="{{ url_for('dashboard.dashboard') }}">Return Home</a>
+  {% else %}
+    <a class="btn btn-primary" href="{{ url_for('auth.login') }}">Return Home</a>
+  {% endif %}
+</div>
+{% endblock %}
+

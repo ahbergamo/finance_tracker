@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Edit Budget{% endblock %}
+{% block content %}
+<div class="container">
+  <h2 class="mb-4">Edit Budget</h2>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.name.label(class="form-label") }}
+      {{ form.name(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.amount.label(class="form-label") }}
+      {{ form.amount(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.start_date.label(class="form-label") }}
+      {{ form.start_date(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.end_date.label(class="form-label") }}
+      {{ form.end_date(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.category_ids.label(class="form-label") }}
+      {{ form.category_ids(class="form-select", multiple=True) }}
+    </div>
+    <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+    <a href="{{ url_for('budgets.budgets') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

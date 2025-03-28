@@ -1,0 +1,147 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Clean Local",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "cd ${workspaceFolder} && find . -type d -name '__pycache__' -exec rm -rf {} +"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "detail": "Cleans out the local Flask/Python project by removing __pycache__ directories."
+    },
+    {
+      "label": "Lint Code",
+      "type": "shell",
+      "command": "python -m flake8 .",
+      "group": "build",
+      "problemMatcher": [],
+      "detail": "Lint the code using flake8, good stuff, probably want to double check..."
+    },
+    {
+      "label": "Build & Deploy to Pi",
+      "type": "shell",
+      "command": "bash deploy_pi_local.sh",
+      "problemMatcher": [],
+      "group": "build",
+      "detail": "Clean, build, and deploy to the Raspberry Pi"
+    },
+    {
+      "label": "Clean SQLite DB",
+      "type": "shell",
+      "command": "rm",
+      "args": [
+        "-f",
+        "${workspaceFolder}/instance/finance_tracker_dev.db"
+      ],
+      "problemMatcher": [],
+      "detail": "Deletes the SQLite DB file from the instance directory"
+    },
+    {
+      "label": "Clean Migrations Folder",
+      "type": "shell",
+      "command": "rm",
+      "args": [
+        "-rf",
+        "${workspaceFolder}/migrations"
+      ],
+      "problemMatcher": [],
+      "detail": "Deletes the migrations folder to remove previous migration files"
+    },
+    {
+      "label": "Flask DB Init",
+      "type": "shell",
+      "command": "flask",
+      "args": [
+        "db",
+        "init"
+      ],
+      "detail": "Initializes the Flask migration environment by creating the migrations folder.",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flask DB Migrate",
+      "type": "shell",
+      "command": "flask",
+      "args": [
+        "db",
+        "migrate",
+        "-m",
+        "initial migration"
+      ],
+      "detail": "Generates a new migration by detecting changes to your models.",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flask DB Upgrade",
+      "type": "shell",
+      "command": "flask",
+      "args": [
+        "db",
+        "upgrade"
+      ],
+      "detail": "Applies the migration to update your database schema.",
+      "problemMatcher": []
+    },
+    {
+      "label": "Seed DB",
+      "type": "shell",
+      "command": "flask",
+      "args": [
+        "seed-db"
+      ],
+      "problemMatcher": [],
+      "detail": "Runs the seed-db command to populate the database"
+    },
+    {
+      "label": "Flask Dev All",
+      "dependsOn": [
+        "Clean SQLite DB",
+        "Clean Migrations Folder",
+        "Flask DB Init",
+        "Flask DB Migrate",
+        "Flask DB Upgrade",
+        "Seed DB"
+      ],
+      "dependsOrder": "sequence",
+      "type": "shell",
+      "detail": "Cleans the SQLite DB and migrations folder, then initializes, migrates, upgrades, and seeds the Flask database for development.",
+      "problemMatcher": []
+    },
+    {
+      "label": "Flask Dev Some (No Init, Migrate)",
+      "dependsOn": [
+        "Clean SQLite DB",
+        // "Clean Migrations Folder",
+        // "Flask DB Init",
+        // "Flask DB Migrate",
+        "Flask DB Upgrade",
+        "Seed DB"
+      ],
+      "dependsOrder": "sequence",
+      "type": "shell",
+      "detail": "Cleans the SQLite DB and migrations folder, then upgrades, and seeds the Flask database for development.",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Pytest with Coverage",
+      "type": "shell",
+      "command": "pytest --cov=app --cov-report=html && open htmlcov/index.html",
+      "group": {
+        "kind": "test",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "detail": "Run tests with coverage and show missing lines in HTML report."
+    }
+  ]
+}
