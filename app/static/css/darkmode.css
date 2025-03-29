@@ -1,0 +1,45 @@
+/* Set the overall background for dark mode to #2b2b2b */
+[data-bs-theme="dark"] html,
+[data-bs-theme="dark"] body {
+  background-color: var(--dark-bg);
+  color: #eee;
+}
+
+/* Cards: use the same background as the overall background, or a slightly different shade if desired */
+[data-bs-theme="dark"] .card {
+  background-color: var(--dark-bg); /* matching overall background */
+  color: #eee;
+  border: 1px solid #444;
+}
+
+[data-bs-theme="dark"] .card-header {
+  background-color: #232323; /* slightly darker for header contrast */
+  color: #fff;
+  border-bottom: 1px solid #555;
+}
+
+[data-bs-theme="dark"] .card-body {
+  background-color: var(--dark-bg);
+}
+
+/* Graph boxes: adjust shadow if needed */
+[data-bs-theme="dark"] .graph-box {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* List groups: match the overall dark background */
+[data-bs-theme="dark"] .list-group-item {
+  background-color: var(--dark-bg);
+  border: 1px solid #444;
+  color: #ddd;
+}
+
+/* Footer adjustments */
+[data-bs-theme="dark"] footer.bg-light {
+  background-color: var(--dark-bg);
+  color: #ccc;
+}
+
+[data-bs-theme="dark"] footer a {
+  color: #bbb;
+}

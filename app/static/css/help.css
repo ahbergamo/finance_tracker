@@ -1,0 +1,53 @@
+/* help.css: Styles specific to the Help page layout */
+.guide-container {
+    display: flex;
+    margin-top: 2rem;
+  }
+  
+  .sidebar {
+    width: 240px;
+    padding: 1rem;
+    border-right: 1px solid #ddd;
+    position: sticky;
+    top: 1rem;
+    height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+  
+  .sidebar h4 {
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    margin-bottom: 0.75rem;
+  }
+  
+  .sidebar ul li a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .sidebar ul li a:hover {
+    text-decoration: underline;
+  }
+  
+  .content {
+    flex: 1;
+    padding: 1rem 2rem;
+  }
+  
+  .content h1, .content h2, .content h3 {
+    margin-top: 1.5rem;
+  }
+  
+  .section {
+    margin-bottom: 2rem;
+  }
+  

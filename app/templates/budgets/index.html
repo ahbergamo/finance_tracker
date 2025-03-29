@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Budgets{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Budgets</h2>
+    <a href="{{ url_for('budgets.add_budget_page') }}" class="btn btn-outline-primary btn-sm me-2">Add Budget</a>
+  </div>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Categories</th>
+        <th>Budgeted Amount</th>
+        <th>Spent</th>
+        <th>Remaining</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for budget in budgets %}
+      <tr>
+        <td>{{ budget.name }}</td>
+        <td>
+          {% if budget.categories %}
+          {% for category in budget.categories %}
+          <span class="badge bg-primary">{{ category }}</span>
+          {% endfor %}
+          {% else %}
+          <span class="text-muted">No categories</span>
+          {% endif %}
+        </td>
+        <td>${{ "{:,.2f}".format(budget.amount) }}</td>
+        <td>${{ "{:,.2f}".format(budget.spent) }}</td>
+        <td class="{% if budget.remaining < 0 %}text-danger{% endif %}">
+          ${{ "{:,.2f}".format(budget.remaining) }}
+        </td>
+        <td>{{ budget.start_date }}</td>
+        <td>{{ budget.end_date }}</td>
+        <td>
+          <div class="d-inline-flex" style="gap: 0.5rem;">
+            <a href="{{ url_for('budgets.edit_budget', budget_id=budget.id) }}" class="btn btn-primary"
+              title="Edit Budget">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+            <form action="{{ url_for('budgets.delete_budget', budget_id=budget.id) }}" method="POST"
+              onsubmit="return confirm('Are you sure?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-primary" title="Delete Budget">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="8" class="text-center">No budgets found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+name: finance_tracker_group
+
+services:
+  finance_tracker:
+    container_name: finance_tracker_portable
+    image: abergamo/finance-tracker:latest
+    environment:
+      FLASK_CONFIG: "${FLASK_CONFIG}"
+      SECRET_KEY: "${SECRET_KEY}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+      DB_HOST: mysql_db
+      DB_PORT: "${DB_PORT}"
+      DB_NAME: "${DB_NAME}"
+      REDIS_URL: "redis://redis:6379"
+    expose:
+      - "5000"
+    depends_on:
+      - mysql_db
+      - redis
+    restart: unless-stopped
+
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      MYSQL_DATABASE: "${DB_NAME}"
+      MYSQL_USER: "${DB_USER}"
+      MYSQL_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+
+  nginx:
+    image: abergamo/finance-tracker:nginx
+    container_name: nginx_proxy
+    ports:
+      - "1310:80"
+    depends_on:
+      - finance_tracker
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

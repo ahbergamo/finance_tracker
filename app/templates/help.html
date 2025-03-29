@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Help & User Guide{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/help.css') }}">
+{% endblock %}
+{% block content %}
+<div class="guide-container">
+  <aside class="sidebar">
+    <h4>📖 Contents</h4>
+    <ul>
+      <li><a href="#quick-start">🚀 Quick Start</a></li>
+      <li><a href="#family-sharing">👨‍👩‍👧‍👦 Family Sharing & Collaboration</a></li>
+      <li><a href="#dashboard-guide">📊 Dashboard Overview</a></li>
+      <li><a href="#transactions-guide">💰 Transactions & Bulk Delete</a></li>
+      <li><a href="#detailed-guide">📋 Detailed User Guide</a></li>
+      <li><a href="#about-fracker">ℹ️ About FRacker</a></li>
+    </ul>
+  </aside>
+  <main class="content">
+    <h1 id="top">FRacker</h1>
+    <p>Welcome to <strong>FRacker</strong>, your personal finance tracker! This guide will help you get started and make the most of the app’s features.</p>
+    <section id="quick-start" class="section">
+      <h2>🚀 Quick Start</h2>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Step</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Register & Login</strong></td>
+            <td>Click <strong>Register</strong> and enter your details. Login and select "Remember Me" to stay logged in.</td>
+          </tr>
+          <tr>
+            <td><strong>2. Set Up Your Account</strong></td>
+            <td>Go to <strong>Admin → Accounts</strong> and configure CSV column mappings for your bank statements.</td>
+          </tr>
+          <tr>
+            <td><strong>3. Setup Import Rules (Optional)</strong></td>
+            <td>Go to <strong>Admin → Import Rules</strong> and add rules to automatically adjust transaction categories and mark transfers.</td>
+          </tr>
+          <tr>
+            <td><strong>4. Import Transactions</strong></td>
+            <td>Navigate to <strong>Transactions → Import</strong>, upload your CSV file(s), preview transactions, and confirm the import.</td>
+          </tr>
+          <tr>
+            <td><strong>5. Review & Manage</strong></td>
+            <td>Use the <strong>Transactions</strong>, <strong>Reports</strong>, and <strong>Budgets</strong> sections to analyze and refine your data.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    <hr>
+    <section id="family-sharing" class="section">
+      <h2>👨‍👩‍👧‍👦 Family Sharing & Collaboration</h2>
+      <p>FRacker supports shared financial management through family groups.</p>
+      <ul>
+        <li><strong>Shared Visibility:</strong> All members of a family group can view and collaborate on transactions, budgets, and reports.</li>
+        <li><strong>Collaborative Planning:</strong> Work together to set financial goals and track progress.</li>
+        <li><strong>Easy Management:</strong> Update your family name in your <strong>Profile</strong> settings to join or create a group.</li>
+      </ul>
+    </section>
+    <hr>
+    <section id="dashboard-guide" class="section">
+      <h2>📊 Dashboard Overview</h2>
+      <p>The <strong>Dashboard</strong> gives you a quick snapshot of your finances with a range of interactive cards. You can customize which cards appear using the <strong>Manage Dashboard</strong> button.</p>
+      <ul>
+        <li><strong>Monthly Income & Expenses:</strong> View a bar chart that compares your income and expenses for each of the past 12 months.</li>
+        <li><strong>Monthly Net:</strong> See your net balance (income minus expenses) as a line chart.</li>
+        <li><strong>Category Charts:</strong> Two charts show the top income and expense categories (with excess items grouped as “Rest”).</li>
+        <li><strong>Category Lists:</strong> Detailed lists of income and expense categories with totals.</li>
+        <li><strong>Budget vs. Actual:</strong> Compare your budgeted amounts against what you’ve spent.</li>
+        <li><strong>Recent Transactions:</strong> A quick look at your latest transactions.</li>
+        <li><strong>Cash Flow Overview:</strong> Track your cumulative balance over the current month.</li>
+      </ul>
+      <p>To customize which cards appear on your dashboard, click the <strong>Manage Dashboard</strong> button at the top of the dashboard. Use the toggle switches to enable or disable each card. You can also drag and drop the cards to reorder them as you prefer.</p>
+    </section>
+    <hr>
+    <section id="transactions-guide" class="section">
+      <h2>💰 Transactions & Bulk Delete</h2>
+      <p>The <strong>Transactions</strong> section lets you view, add, and edit individual transactions. In addition to standard management, a new <strong>Bulk Delete</strong> feature has been added to help you quickly remove multiple transactions at once.</p>
+      <ul>
+        <li><strong>Filtering:</strong> Use the dropdowns and date filters at the top of the transactions page to narrow down your list by date, category, or account.</li>
+        <li><strong>Bulk Delete:</strong> In the Admin dropdown menu, click on <strong>Bulk Delete</strong>. From there, you can:
+          <ul>
+            <li>Apply filters to list the transactions you wish to delete.</li>
+            <li>Select individual transactions using the checkboxes, or select all on the page.</li>
+            <li>Click <strong>Delete Selected</strong> to remove only the chosen transactions or <strong>Delete All</strong> to remove every matching transaction.</li>
+          </ul>
+        </li>
+        <li><strong>Confirmation:</strong> You will be asked for confirmation before any bulk delete action is executed to prevent accidental data loss.</li>
+      </ul>
+    </section>
+    <hr>
+    <section id="detailed-guide" class="section">
+      <h2>📋 Detailed User Guide</h2>
+      <h3>🏠 Dashboard</h3>
+      <p>The Dashboard is designed to give you an at-a-glance view of your financial health. Customize it to show only the information you need.</p>
+      <h3>💰 Transactions</h3>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>View</strong></td>
+            <td>Filter transactions by time period, category, and account.</td>
+          </tr>
+          <tr>
+            <td><strong>Add</strong></td>
+            <td>Manually enter transactions including amount, description, and category. Select the appropriate account type.</td>
+          </tr>
+          <tr>
+            <td><strong>Import</strong></td>
+            <td>Upload CSV files to import transactions in batches. Preview the transactions before finalizing the import.</td>
+          </tr>
+          <tr>
+            <td><strong>Edit/Delete</strong></td>
+            <td>Modify or remove individual transactions using the provided actions.</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>🔄 Duplicate Handling</h3>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Duplicate Type</th>
+            <th>Behavior</th>
+            <th>Force Import Default</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Same File Duplicate</strong></td>
+            <td>Marked as duplicate but allowed to be force-imported if necessary.</td>
+            <td>Force Import option available.</td>
+          </tr>
+          <tr>
+            <td><strong>Database Duplicate</strong></td>
+            <td>Identified as a duplicate based on existing records; manual confirmation is required to re-import.</td>
+            <td>Not allowed by default.</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>📊 Budgets & Reports</h3>
+      <ul>
+        <li><strong>Budgets:</strong> Set financial goals by defining budgets and tracking spending against them.</li>
+        <li><strong>Reports:</strong> Generate monthly, annual, and income vs. expense reports to analyze trends over time.</li>
+      </ul>
+      <h3>🔧 Account Types & Import Rules</h3>
+      <ul>
+        <li><strong>Account Types:</strong> Configure how imported CSV files are interpreted, including mapping CSV columns.</li>
+        <li><strong>Import Rules:</strong> Create rules to automatically categorize transactions or mark them as transfers based on keywords.</li>
+      </ul>
+      <h3>🔑 Profile & Account Management</h3>
+      <ul>
+        <li><strong>Edit Profile:</strong> Update your username, email, or family group.</li>
+        <li><strong>Change Password:</strong> Update your password to keep your account secure.</li>
+        <li><strong>Logout:</strong> Sign out safely when finished.</li>
+      </ul>
+      <h3>❓ FAQ & Troubleshooting</h3>
+      <ul>
+        <li><strong>Login Issues:</strong> If you have trouble logging in, try resetting your password.</li>
+        <li><strong>CSV Import Errors:</strong> Ensure your CSV headers match the account type configuration.</li>
+        <li><strong>Import Rules Not Working:</strong> Verify that the rules match the CSV patterns correctly.</li>
+      </ul>
+    </section>
+    <hr>
+    <section id="about-fracker" class="section">
+      <h2>ℹ️ About FRacker</h2>
+      <p>FRacker is a powerful tool designed for tracking personal finances, creating budgets, and generating insightful reports. It supports family sharing for collaborative financial management.</p>
+      <p>For assistance, visit our <a href="https://github.com/ahbergamo/finance_tracker/issues" target="_blank">GitHub Issues</a> page.</p>
+    </section>
+  </main>
+</div>
+{% endblock %}

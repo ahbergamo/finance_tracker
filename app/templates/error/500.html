@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Internal Server Error{% endblock %}
+{% block content %}
+<div class="text-center">
+  <h1 class="display-4">500</h1>
+  <p class="lead">Oops! Something went wrong on our end. Please try again later.</p>
+  {% if current_user.is_authenticated %}
+    <a class="btn btn-primary" href="{{ url_for('dashboard.dashboard') }}">Return Home</a>
+  {% else %}
+    <a class="btn btn-primary" href="{{ url_for('auth.login') }}">Return Home</a>
+  {% endif %}
+</div>
+{% endblock %}

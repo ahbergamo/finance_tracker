@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="mb-4">Transactions</h1>
+    </div>
+    <div>
+      <a href="{{ url_for('transactions.import_transactions') }}" class="btn btn-outline-primary btn-sm me-2">
+        <i class="fas fa-upload"></i> Import Transactions
+      </a>
+      <a href="{{ url_for('transactions.add_transaction') }}" class="btn btn-outline-primary btn-sm me-2">
+        <i class="fas fa-plus"></i> Add Transaction
+      </a>
+      <a href="{{ url_for('transactions.download_transactions_csv', **request.args) }}"
+        class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-file-download"></i> Download CSV
+      </a>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-md-8 mt-4">
+      <div class="mb-3 d-flex align-items-center gap-2">
+        <a href="{{ url_for('transactions.transactions', page=1, filter=filter_type, time_filter='month', category_id=selected_category, account_id=selected_account) }}"
+          class="btn btn-outline-secondary btn-sm {% if request.args.get('time_filter')=='month' %}active{% endif %}">
+          Current Month
+        </a>
+        <a href="{{ url_for('transactions.transactions', page=1, filter=filter_type, time_filter='ytd', category_id=selected_category, account_id=selected_account) }}"
+          class="btn btn-outline-secondary btn-sm {% if request.args.get('time_filter')=='ytd' %}active{% endif %}">
+          Year to Date
+        </a>
+        <a href="{{ url_for('transactions.transactions', page=1, filter=filter_type, time_filter='all', category_id=selected_category, account_id=selected_account) }}"
+          class="btn btn-outline-secondary btn-sm {% if request.args.get('time_filter')=='all' or not request.args.get('time_filter') %}active{% endif %}">
+          All Time
+        </a>
+        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse"
+          data-bs-target="#customDateRange">
+          Custom
+        </button>
+        <a href="{{ url_for('transactions.transactions', filter='normal', time_filter='all') }}"
+          class="btn btn-outline-secondary btn-sm">
+          Clear Filters
+        </a>
+      </div>
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+          <form method="get" class="d-flex align-items-center">
+            <input type="hidden" name="filter" value="{{ filter_type }}">
+            <input type="hidden" name="time_filter" value="{{ request.args.get('time_filter') }}">
+            {% if request.args.get('start_date') %}
+            <input type="hidden" name="start_date" value="{{ request.args.get('start_date') }}">
+            {% endif %}
+            {% if request.args.get('end_date') %}
+            <input type="hidden" name="end_date" value="{{ request.args.get('end_date') }}">
+            {% endif %}
+            <label for="category_id" class="visually-hidden">Category</label>
+            <select name="category_id" id="category_id" class="form-select form-select-sm"
+              onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              {% for category in categories|sort(attribute='name') %}
+              <option value="{{ category.id }}" {% if selected_category and category.id==selected_category %}selected{%
+                endif %}>
+                {{ category.name }}
+              </option>
+              {% endfor %}
+            </select>
+            <input type="hidden" name="account_id" value="{{ selected_account }}">
+          </form>
+        </div>
+        <div class="col-md-6">
+          <form method="get" class="d-flex align-items-center">
+            <input type="hidden" name="filter" value="{{ filter_type }}">
+            <input type="hidden" name="time_filter" value="{{ request.args.get('time_filter') }}">
+            {% if request.args.get('start_date') %}
+            <input type="hidden" name="start_date" value="{{ request.args.get('start_date') }}">
+            {% endif %}
+            {% if request.args.get('end_date') %}
+            <input type="hidden" name="end_date" value="{{ request.args.get('end_date') }}">
+            {% endif %}
+            <label for="account_id" class="visually-hidden">Account</label>
+            <select name="account_id" id="account_id" class="form-select form-select-sm" onchange="this.form.submit()">
+              <option value="">All Accounts</option>
+              {% for account in account_types|sort(attribute='name') %}
+              <option value="{{ account.id }}" {% if selected_account and account.id==selected_account %}selected{%
+                endif %}>
+                {{ account.name }}
+              </option>
+              {% endfor %}
+            </select>
+            <input type="hidden" name="category_id" value="{{ selected_category }}">
+          </form>
+        </div>
+      </div>
+      <div class="row mb-3 align-items-center pt-3">
+        <ul class="nav nav-pills mb-4" id="transactionTabs">
+          <li class="nav-item">
+            <a class="nav-link {% if filter_type == 'normal' %}active{% endif %}"
+              href="{{ url_for('transactions.transactions', filter='normal', time_filter=request.args.get('time_filter', 'all'), category_id=selected_category, account_id=selected_account) }}">
+              <i class="bi bi-list-check"></i> All Transactions
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if filter_type == 'duplicates' %}active{% endif %}"
+              href="{{ url_for('transactions.transactions', filter='duplicates', time_filter=request.args.get('time_filter', 'all'), category_id=selected_category, account_id=selected_account) }}">
+              <i class="bi bi-exclamation-triangle"></i> Duplicates
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if filter_type == 'transfers' %}active{% endif %}"
+              href="{{ url_for('transactions.transactions', filter='transfers', time_filter=request.args.get('time_filter', 'all'), category_id=selected_category, account_id=selected_account) }}">
+              <i class="bi bi-arrow-left-right"></i> Transfers
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="collapse mb-3" id="customDateRange">
+        <form method="get" class="row g-3">
+          <div class="col-auto">
+            <label for="start_date" class="col-form-label">Start Date:</label>
+          </div>
+          <div class="col-auto">
+            <input type="date" name="start_date" id="start_date" class="form-control"
+              value="{{ request.args.get('start_date') }}">
+          </div>
+          <div class="col-auto">
+            <label for="end_date" class="col-form-label">End Date:</label>
+          </div>
+          <div class="col-auto">
+            <input type="date" name="end_date" id="end_date" class="form-control"
+              value="{{ request.args.get('end_date') }}">
+          </div>
+          <input type="hidden" name="time_filter" value="custom">
+          <input type="hidden" name="filter" value="{{ filter_type }}">
+          {% if selected_category %}
+          <input type="hidden" name="category_id" value="{{ selected_category }}">
+          {% endif %}
+          {% if selected_account %}
+          <input type="hidden" name="account_id" value="{{ selected_account }}">
+          {% endif %}
+          <div class="col-auto">
+            <button type="submit" class="btn btn-primary mb-3 btn-sm">Apply</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card summary-box">
+        <div class="card-body">
+          {% if request.args.get('start_date') and request.args.get('end_date') %}
+          <div class="d-flex justify-content-between summary-item">
+            <span><strong>Date Range:</strong></span>
+            <span>{{ request.args.get('start_date') }} - {{ request.args.get('end_date') }}</span>
+          </div>
+          {% elif request.args.get('time_filter') %}
+          <div class="d-flex justify-content-between summary-item">
+            <span><strong>Date Range:</strong></span>
+            <span>{{ request.args.get('time_filter')|capitalize }}</span>
+          </div>
+          {% else %}
+          <div class="d-flex justify-content-between summary-item">
+            <span><strong>Date Range:</strong></span>
+            <span>All Time</span>
+          </div>
+          {% endif %}
+          <hr>
+          <div class="d-flex justify-content-between summary-item">
+            <span><strong>Total Transactions:</strong></span>
+            <span>{{ summary.total_count }}</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between summary-item">
+            <span><strong>Total Income:</strong></span>
+            <span>${{ "{:,.2f}".format(summary.total_income) }}</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between summary-item">
+            <span><strong>Total Expense:</strong></span>
+            <span>${{ "{:,.2f}".format(summary.total_expense) }}</span>
+          </div>
+          <hr>
+          <div class="d-flex justify-content-between summary-item">
+            <span><strong>Net:</strong></span>
+            <span>${{ "{:,.2f}".format(summary.total_income + summary.total_expense) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-4">
+      {% if filter_type == 'duplicates' %}
+      <h2>Duplicate Transactions</h2>
+      {% if grouped_duplicates and grouped_duplicates|length > 0 %}
+      {% for group_key, group in grouped_duplicates.items() %}
+      <div class="card mb-3">
+        <div class="card-header">
+          Duplicate Group: Date: {{ group_key[0] }}, Amount: ${{ "{:,.2f}".format(group_key[1]) }}, Count: {{
+          group|length }}
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-bordered m-0">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Account Type</th>
+                <th>Category</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for transaction in group %}
+              <tr>
+                <td>{{ transaction.timestamp.strftime('%Y-%m-%d') if transaction.timestamp else '' }}</td>
+                <td>{{ transaction.description or "No description" }}</td>
+                <td>{{ transaction.account.name if transaction.account else "Not set" }}</td>
+                <td>{{ transaction.category.name if transaction.category else "No category" }}</td>
+                <td>
+                  <div class="d-inline-flex" style="gap: 0.5rem;">
+                    <a href="{{ url_for('transactions.edit_transaction', transaction_id=transaction.id) }}"
+                      class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top"
+                      title="Edit Transaction">
+                      <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <form action="{{ url_for('transactions.delete_transaction', transaction_id=transaction.id) }}"
+                      method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Delete Transaction">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <p class="text-center">No duplicate transactions found.</p>
+      {% endif %}
+      {% else %}
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Account Type</th>
+            <th>Category</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for transaction in transactions %}
+          <tr>
+            <td>{{ transaction.timestamp.strftime('%Y-%m-%d') if transaction.timestamp else '' }}</td>
+            <td>{{ transaction.description or "No description" }}</td>
+            <td class="text-end">${{ "{:,.2f}".format(transaction.amount) }}</td>
+            <td>{{ transaction.account.name if transaction.account else "Not set" }}</td>
+            <td>{{ transaction.category.name if transaction.category else "No category" }}</td>
+            <td>
+              <div class="d-inline-flex" style="gap: 0.5rem;">
+                <a href="{{ url_for('transactions.edit_transaction', transaction_id=transaction.id) }}"
+                  class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top"
+                  title="Edit Transaction">
+                  <i class="bi bi-pencil-square"></i>
+                </a>
+                <form action="{{ url_for('transactions.delete_transaction', transaction_id=transaction.id) }}"
+                  method="POST" onsubmit="return confirm('Are you sure you want to delete this transaction?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-primary btn-sm" data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Delete Transaction">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-center">No transactions found</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+    {% if pagination and filter_type != 'duplicates' %}
+    <div class="position-relative mx-auto" style="max-width: 900px;">
+      <nav aria-label="Page navigation">
+        <ul class="pagination mb-0" style="margin: 0 auto; width: fit-content;">
+          {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('transactions.transactions',
+                                page=pagination.prev_num,
+                                filter=filter_type,
+                                time_filter=request.args.get('time_filter'),
+                                start_date=request.args.get('start_date'),
+                                end_date=request.args.get('end_date'),
+                                category_id=selected_category,
+                                account_id=selected_account) }}">
+              Previous
+            </a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Previous</span>
+          </li>
+          {% endif %}
+          {% for page_num in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+          {% if page_num %}
+          {% if page_num == pagination.page %}
+          <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+          {% else %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('transactions.transactions',
+                                    page=page_num,
+                                    filter=filter_type,
+                                    time_filter=request.args.get('time_filter'),
+                                    start_date=request.args.get('start_date'),
+                                    end_date=request.args.get('end_date'),
+                                    category_id=selected_category,
+                                    account_id=selected_account) }}">
+              {{ page_num }}
+            </a>
+          </li>
+          {% endif %}
+          {% else %}
+          <li class="page-item disabled"><span class="page-link">…</span></li>
+          {% endif %}
+          {% endfor %}
+
+          {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('transactions.transactions',
+                                page=pagination.next_num,
+                                filter=filter_type,
+                                time_filter=request.args.get('time_filter'),
+                                start_date=request.args.get('start_date'),
+                                end_date=request.args.get('end_date'),
+                                category_id=selected_category,
+                                account_id=selected_account) }}">
+              Next
+            </a>
+          </li>
+          {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">Next</span>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%);"
+        class="d-flex align-items-center">
+        <span class="me-2">Items per page:</span>
+        <form method="POST" action="{{ url_for('transactions.set_per_page') }}" class="mb-0">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <select name="per_page" id="per_page" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="10" {% if session.get('per_page', 10)==10 %}selected{% endif %}>10</option>
+            <option value="25" {% if session.get('per_page', 10)==25 %}selected{% endif %}>25</option>
+            <option value="50" {% if session.get('per_page', 10)==50 %}selected{% endif %}>50</option>
+          </select>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endblock %}

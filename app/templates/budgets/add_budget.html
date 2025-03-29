@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Add Budget{% endblock %}
+{% block content %}
+<div class="container">
+  <h2 class="mb-4">Add Budget</h2>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">
+      {{ form.name.label(class="form-label") }}
+      {{ form.name(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.amount.label(class="form-label") }}
+      {{ form.amount(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.start_date.label(class="form-label") }}
+      {{ form.start_date(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.end_date.label(class="form-label") }}
+      {{ form.end_date(class="form-control") }}
+    </div>
+    <div class="mb-3">
+      {{ form.category_ids.label(class="form-label") }}
+      <select name="category_ids" class="form-control form-select" multiple size="5">
+        {% for value, label in form.category_ids.choices %}
+        <option value="{{ value }}" {% if value in form.category_ids.data %}selected{% endif %}>
+          {{ label }}
+        </option>
+        {% endfor %}
+      </select>
+      <small class="form-text text-muted">Hold Ctrl (Cmd on Mac) to select multiple categories.</small>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+    <a href="{{ url_for('budgets.budgets') }}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

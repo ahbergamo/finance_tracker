@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Annual Overview Report{% endblock %}
+{% block extra_head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="{{ url_for('static', filename='js/reports/utils.js') }}"></script>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <h1 class="mb-4">Annual Overview Report</h1>
+  
+  <form method="GET" action="{{ url_for('report.annual_overview') }}" class="row g-3 mb-4">
+    <div class="col-md-3">
+      <label for="start_date" class="form-label">Start Date</label>
+      <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+    <div class="col-md-3">
+      <label for="end_date" class="form-label">End Date</label>
+      <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+    <div class="col-md-2">
+      <label for="category" class="form-label">Category</label>
+      <select name="category_id" id="category" class="form-select">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.id }}" {% if selected_category and selected_category|int == cat.id %}selected{% endif %}>
+            {{ cat.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label for="account" class="form-label">Account</label>
+      <select name="account_id" id="account_id" class="form-select">
+        <option value="">All Accounts</option>
+        {% for acc in accounts %}
+          <option value="{{ acc.id }}" {% if selected_account and selected_account == acc.id %}selected{% endif %}>
+            {{ acc.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2 align-self-end">
+      <button type="submit" class="btn btn-primary">Apply</button>
+    </div>
+  </form>
+  
+  <canvas id="annualOverviewChart"></canvas>
+  
+  <div class="mt-4">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Total Income</th>
+          <th>Total Expense</th>
+          <th>Net</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in annual_data %}
+        <tr>
+          <td>{{ item.year }}</td>
+          <td>${{ "{:,.2f}".format(item.total_income) }}</td>
+          <td>${{ "{:,.2f}".format(item.total_expense) }}</td>
+          <td>${{ "{:,.2f}".format(item.net) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  window.annualOverviewData = {
+    labels: {{ labels|tojson }},
+    incomes: {{ incomes|tojson }},
+    expenses: {{ expenses|tojson }},
+    urlTransactions: "{{ url_for('transactions.transactions') }}"
+  };
+</script>
+<script src="{{ url_for('static', filename='js/reports/annual_overview.js') }}"></script>
+{% endblock %}

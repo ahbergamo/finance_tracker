@@ -1,0 +1,112 @@
+# tests/services/reports/test_monthly.py
+import pytest
+from datetime import date, datetime
+from dateutil.relativedelta import relativedelta
+from unittest.mock import patch, MagicMock
+from app.services.reports.monthly import (
+    get_date_range,
+    parse_custom_date_range,
+    get_family_filter,
+    build_base_query,
+    generate_chart_data,
+    get_dropdown_options
+)
+from app.models.user import User
+
+
+def test_get_date_range_custom():
+    today = date(2023, 3, 15)
+    start_date_str = '2023-01-10'
+    end_date_str = '2023-01-20'
+    start, end = get_date_range(today, 'custom', start_date_str, end_date_str)
+    assert start == datetime.strptime(start_date_str, '%Y-%m-%d').date()
+    assert end == datetime.strptime(end_date_str, '%Y-%m-%d').date()
+
+
+def test_get_date_range_ytd():
+    today = date(2023, 3, 15)
+    start, end = get_date_range(today, 'ytd')
+    assert start == date(2023, 1, 1)
+    assert end == today
+
+
+def test_parse_custom_date_range_invalid():
+    today = date(2023, 3, 15)
+    start, end = parse_custom_date_range(today, 'not-a-date', 'not-a-date')
+    # When invalid, the fallback returns a date
+    assert start == today - relativedelta(months=12)
+    assert end == today
+
+
+def test_get_family_filter_no_family():
+    user = User(id=1, family_id=None)
+    filter_expr = get_family_filter(user)
+    assert filter_expr is not None
+
+
+def test_get_family_filter_family():
+    user = User(id=1, family_id=999)
+    filter_expr = get_family_filter(user)
+    assert filter_expr is not None
+
+
+@patch("app.services.reports.monthly.db.session.query")
+def test_build_base_query(mock_query):
+    mock_instance = MagicMock()
+    mock_instance.filter.return_value = mock_instance
+    mock_query.return_value = mock_instance
+    filter_expr = MagicMock()
+    start_date = datetime(2023, 1, 1)
+    end_date = datetime(2023, 1, 31)
+    returned_query = build_base_query(filter_expr, start_date, end_date, 123, 456)
+    assert returned_query is mock_instance
+    mock_query.assert_called_once()
+
+
+def test_generate_chart_data():
+    # Dummy query class that returns row objects with attributes.
+    class DummyRow:
+        def __init__(self, year, month, total):
+            self.year = year
+            self.month = month
+            self.total = total
+
+    class DummyQuery:
+
+        def filter(self, *args, **kwargs):
+            return self
+        
+        def group_by(self, *args, **kwargs):
+            return self
+        
+        def order_by(self, *args, **kwargs):
+            return self
+        
+        def all(self):
+            return [
+                DummyRow(2023, 1, -100.0),
+                DummyRow(2023, 2, -300.5),
+            ]
+        
+    labels, totals = generate_chart_data(
+        family_filter=MagicMock(),
+        start_date=date(2023, 1, 1),
+        end_date=date(2023, 2, 28),
+        category_id=None,
+        account_id=None
+    )
+    assert labels == ["2023-01 (Jan)", "2023-02 (Feb)"]
+    assert totals == [100.0, 300.5]
+
+
+@patch("app.services.reports.monthly.Category.query", new_callable=MagicMock)
+@patch("app.services.reports.monthly.AccountType.query", new_callable=MagicMock)
+def test_get_dropdown_options(mock_account_query, mock_category_query):
+    user = User(id=1, family_id=999)
+    mock_category_query.filter_by.return_value.all.return_value = ["catX", "catY"]
+    mock_account_query.filter_by.return_value.all.return_value = ["acctX", "acctY"]
+    categories, accounts = get_dropdown_options(user)
+    assert categories == ["catX", "catY"]
+    assert accounts == ["acctX", "acctY"]
+    mock_category_query.filter_by.assert_called_once_with(family_id=999)
+    mock_account_query.filter_by.assert_called_once_with(family_id=999)

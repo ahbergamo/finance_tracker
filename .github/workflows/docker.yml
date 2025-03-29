@@ -1,0 +1,53 @@
+name: Docker Build & Push
+
+on:
+  push:
+    branches: [ main ]           # Only run when main is updated
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Install QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binfmt-support qemu-user-static
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Docker Images
+        run: |
+          set -e
+          APP_VERSION=$(python3 -c "from config.config import DevelopmentConfig; print(DevelopmentConfig.VERSION)")
+          echo "Building version: ${APP_VERSION}"
+
+          find docker_portable -maxdepth 1 -type f -exec cp {} ./ \;
+
+          docker buildx build --no-cache \
+            --platform linux/amd64,linux/arm64 \
+            -t abergamo/finance-tracker:"${APP_VERSION}" \
+            -t abergamo/finance-tracker:latest \
+            --push .
+
+          docker buildx build --no-cache \
+            --platform linux/amd64,linux/arm64 \
+            -f nginx.Dockerfile \
+            -t abergamo/finance-tracker:nginx-"${APP_VERSION}" \
+            -t abergamo/finance-tracker:nginx \
+            --push .
+
+          rm -f docker-compose.yml Dockerfile nginx.conf nginx.Dockerfile entrypoint.sh .env

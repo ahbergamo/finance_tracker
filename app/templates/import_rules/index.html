@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Manage Import Rules{% endblock %}
+{% block content %}
+<div class="container">
+  <h2 class="mb-4">Manage Import Rules</h2>
+  <a href="{{ url_for('import_rules.add_rule') }}" class="btn btn-outline-primary btn-sm me-2">Add Import Rule</a>
+  <table class="table table-striped mt-4">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Account Type</th>
+        <th>Field to Match</th>
+        <th>Match Pattern</th>
+        <th>Is Transfer?</th>
+        <th>Override Category</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rule in rules %}
+      <tr>
+        <td>{{ rule.id }}</td>
+        <td>{{ rule.account_type or 'Global' }}</td>
+        <td>{{ rule.field_to_match }}</td>
+        <td>{{ rule.match_pattern }}</td>
+        <td>{{ 'Yes' if rule.is_transfer else 'No' }}</td>
+        <td>{{ rule.override_category_display }}</td>
+        <td>
+          <div class="d-inline-flex gap-2">
+            <a href="{{ url_for('import_rules.edit_rule', rule_id=rule.id) }}" class="btn btn-primary btn-square"
+              data-bs-toggle="tooltip" data-bs-placement="top" title="Edit this rule">
+              <i class="bi bi-pencil-square fs-5"></i>
+            </a>
+            <form action="{{ url_for('import_rules.apply_rule', rule_id=rule.id) }}" method="post" class="m-0"
+              onsubmit="return confirm('Apply this rule to all transactions?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-primary btn-square" data-bs-toggle="tooltip" data-bs-placement="top"
+                title="Apply this rule to all transactions">
+                <i class="bi bi-check-lg fs-5"></i>
+              </button>
+            </form>
+            <form action="{{ url_for('import_rules.delete_rule', rule_id=rule.id) }}" method="post" class="m-0"
+              onsubmit="return confirm('Delete this rule?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-primary btn-square" data-bs-toggle="tooltip" data-bs-placement="top"
+                title="Delete this rule">
+                <i class="bi bi-trash fs-5"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7">No rules found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

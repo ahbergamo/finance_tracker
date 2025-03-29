@@ -1,0 +1,15 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-Migrate
+PyMySQL
+gunicorn
+flake8
+Flask-WTF
+email_validator
+python-dotenv
+python-dateutil
+Flask-Session
+redis
+cryptography
+pytest-cov
