@@ -29,16 +29,7 @@ Track expenses, categorize transactions, set budgets, and visualize your financi
 
 ## Quick Start with Docker🐳
 
-1. Download the latest release bundle:
-
-```bash
-curl -s https://api.github.com/repos/ahbergamo/finance_tracker/releases/latest \
-| grep "browser_download_url.*\\.tar\\.gz" \
-| cut -d '"' -f 4 \
-| xargs curl -L -o finance-tracker.tar.gz
-```
-
-> Or visit the [Releases](https://github.com/ahbergamo/finance-tracker/releases) page to download manually.
+1. Download the latest release bundle: [Releases](https://github.com/ahbergamo/finance-tracker/releases) page to download manually.
 
 2. Copy `.env_default` to `.env` and update values as needed:
 
