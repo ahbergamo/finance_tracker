@@ -17,6 +17,16 @@ PER_BATCH = 10
 
 
 def get_account_type(account_id, current_user):
+    """
+    Retrieve the account type object for a given account ID and current user.
+
+    Args:
+        account_id (int): The ID of the account.
+        current_user (User): The current logged-in user.
+
+    Returns:
+        AccountType: The account type object if found, otherwise None.
+    """
     try:
         acc_type_obj = AccountType.query.filter_by(id=account_id, family_id=current_user.family_id).first()
         if not acc_type_obj:
@@ -40,6 +50,15 @@ def get_account_type(account_id, current_user):
 
 
 def validate_csv(file):
+    """
+    Validate if the uploaded file is a CSV file.
+
+    Args:
+        file (FileStorage): The uploaded file.
+
+    Returns:
+        bool: True if the file is valid, False otherwise.
+    """
     if not file or not file.filename.lower().endswith(".csv"):
         flash("Invalid file format. Please upload a CSV file.", "danger")
         current_app.logger.warning("Invalid file format uploaded.")
@@ -48,6 +67,17 @@ def validate_csv(file):
 
 
 def parse_csv(file, acc_type_obj, delimiter=","):
+    """
+    Parse the uploaded CSV file and extract transaction data.
+
+    Args:
+        file (FileStorage): The uploaded CSV file.
+        acc_type_obj (AccountType): The account type object.
+        delimiter (str): The delimiter used in the CSV file.
+
+    Returns:
+        list: A list of parsed transaction data.
+    """
     try:
         stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
         csv_input = csv.DictReader(stream, delimiter=delimiter)
@@ -65,6 +95,16 @@ def parse_csv(file, acc_type_obj, delimiter=","):
 
 
 def parse_csv_row(row, acc_type_obj):
+    """
+    Parse a single row from the CSV file.
+
+    Args:
+        row (dict): A dictionary representing a row from the CSV file.
+        acc_type_obj (AccountType): The account type object.
+
+    Returns:
+        tuple: A tuple containing transaction details or None if parsing fails.
+    """
     try:
         tx_date = parser.parse(row[acc_type_obj.date_field])
         description = row[acc_type_obj.description_field]
@@ -91,6 +131,16 @@ def parse_csv_row(row, acc_type_obj):
 
 
 def apply_import_rules(transactions_data, acc_type_obj):
+    """
+    Apply import rules to the parsed transaction data.
+
+    Args:
+        transactions_data (list): A list of parsed transaction data.
+        acc_type_obj (AccountType): The account type object.
+
+    Returns:
+        list: A list of processed transaction data with applied rules.
+    """
     processed_data = []
     rules = ImportRule.query.filter(
         (ImportRule.account_type.is_(None)) | (ImportRule.account_type == acc_type_obj.name)
@@ -120,6 +170,17 @@ def apply_import_rules(transactions_data, acc_type_obj):
 
 
 def apply_rules_to_transaction(description, category_name, rules):
+    """
+    Apply specific rules to a transaction based on its description and category.
+
+    Args:
+        description (str): The transaction description.
+        category_name (str): The transaction category name.
+        rules (list): A list of import rules.
+
+    Returns:
+        tuple: A tuple containing a boolean indicating if it's a transfer and the updated category name.
+    """
     is_transfer = False
     for rule in rules:
         value = description if rule.field_to_match.lower() == "description" else category_name
@@ -132,6 +193,18 @@ def apply_rules_to_transaction(description, category_name, rules):
 
 
 def check_duplicate(tx_date, amount, account_id, description):
+    """
+    Check if a transaction is a duplicate in the database.
+
+    Args:
+        tx_date (datetime): The transaction date.
+        amount (float): The transaction amount.
+        account_id (int): The account ID.
+        description (str): The transaction description.
+
+    Returns:
+        bool: True if the transaction is a duplicate, False otherwise.
+    """
     try:
         existing = Transaction.query.filter(
             Transaction.user_id.in_(get_family_user_ids()),
@@ -150,6 +223,16 @@ def check_duplicate(tx_date, amount, account_id, description):
 
 
 def create_transaction_from_tx(tx, current_user):
+    """
+    Create a transaction in the database from the provided transaction data.
+
+    Args:
+        tx (dict): The transaction data.
+        current_user (User): The current logged-in user.
+
+    Returns:
+        bool: True if the transaction was created successfully, False otherwise.
+    """
     try:
         tx_date = datetime.strptime(tx["tx_date"], "%m/%d/%Y")
         amount = tx["amount"]
@@ -188,6 +271,17 @@ def create_transaction_from_tx(tx, current_user):
 
 
 def update_tx_from_form(tx, i, form):
+    """
+    Update transaction data based on form input.
+
+    Args:
+        tx (dict): The transaction data.
+        i (int): The index of the transaction in the form.
+        form (ImmutableMultiDict): The form data.
+
+    Returns:
+        None
+    """
     key_cat = f"transactions[{i}][category_id]"
     if key_cat in form:
         selected_category_id = form.get(key_cat)
@@ -212,6 +306,16 @@ def update_tx_from_form(tx, i, form):
 
 
 def process_import_all(req, current_user):
+    """
+    Process the import of all transactions in the session.
+
+    Args:
+        req (Request): The HTTP request object.
+        current_user (User): The current logged-in user.
+
+    Returns:
+        Response: A redirect response to the appropriate page.
+    """
     processed_data = session.get("processed_data")
     current_app.logger.info("Import All: session processed_data: %s", processed_data)
     if not processed_data:
@@ -238,6 +342,16 @@ def process_import_all(req, current_user):
 
 
 def process_file_upload(req, current_user):
+    """
+    Process the uploaded CSV files and prepare them for import.
+
+    Args:
+        req (Request): The HTTP request object.
+        current_user (User): The current logged-in user.
+
+    Returns:
+        Response: A redirect response or a rendered template for preview.
+    """
     files = req.files.getlist("csv_file")
     if not files:
         flash("No files selected.", "danger")
@@ -283,6 +397,16 @@ def process_file_upload(req, current_user):
 
 
 def process_batch_confirmation(req, current_user):
+    """
+    Process the confirmation of a batch of transactions for import.
+
+    Args:
+        req (Request): The HTTP request object.
+        current_user (User): The current logged-in user.
+
+    Returns:
+        Response: A redirect response or a rendered template for the next batch.
+    """
     processed_data = session.get("processed_data")
     current_app.logger.info("Batch confirmation: session processed_data: %s", processed_data)
     if not processed_data:
@@ -330,11 +454,30 @@ def process_batch_confirmation(req, current_user):
 
 
 def render_import_page_service(current_user):
+    """
+    Render the import transactions page.
+
+    Args:
+        current_user (User): The current logged-in user.
+
+    Returns:
+        Response: A rendered template for the import transactions page.
+    """
     account_types = AccountType.query.filter_by(family_id=current_user.family_id).all()
     return render_template("transactions/import_transactions.html", accounts=account_types)
 
 
 def prepare_import_preview(all_processed_data, current_user):
+    """
+    Prepare the import preview page with the processed transaction data.
+
+    Args:
+        all_processed_data (list): A list of all processed transaction data.
+        current_user (User): The current logged-in user.
+
+    Returns:
+        Response: A rendered template for the import preview page.
+    """
     try:
         session["processed_data"] = all_processed_data
         session["current_index"] = 0

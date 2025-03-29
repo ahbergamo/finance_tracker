@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [1.0.4] - 2025-03-28
+## [1.0.5] - 2025-03-28
 ### Added
 - Initial release of Flask app.
 - User authentication and registration.
