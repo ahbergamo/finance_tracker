@@ -12,7 +12,7 @@ A self-hosted personal finance tracking web application built with Flask.
 
 Track expenses, categorize transactions, set budgets, and visualize your financial data—all securely hosted on your own server or Raspberry Pi.
 
-## Features
+## Features 
 
 - Import bank transactions via CSV
 - Interactive dashboard with customizable charts (Chart.js)  
