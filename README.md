@@ -12,7 +12,7 @@ A self-hosted personal finance tracking web application built with Flask.
 
 Track expenses, categorize transactions, set budgets, and visualize your financial data—all securely hosted on your own server or Raspberry Pi.
 
-## Features
+## Features 
 
 - Import bank transactions via CSV
 - Interactive dashboard with customizable charts (Chart.js)  
@@ -104,8 +104,6 @@ Prebuilt images are available on Docker Hub for use with `docker-compose.yml` fr
 
 Want to help? Awesome!  
 We follow a Git flow model with `main`, `develop`, and `release/*` branches. See [CONTRIBUTING.md](CONTRIBUTING.md#branching-strategy) for details.
-
-Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
 
 ---
 
