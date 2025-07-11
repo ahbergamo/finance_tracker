@@ -5,7 +5,7 @@ import sys
 class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "default_secret_key")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    VERSION = "1.0.4"
+    VERSION = "1.1.0"
 
 
 class DevelopmentConfig(BaseConfig):
