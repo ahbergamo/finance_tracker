@@ -105,8 +105,6 @@ Prebuilt images are available on Docker Hub for use with `docker-compose.yml` fr
 Want to help? Awesome!  
 We follow a Git flow model with `main`, `develop`, and `release/*` branches. See [CONTRIBUTING.md](CONTRIBUTING.md#branching-strategy) for details.
 
-Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
-
 ---
 
 ## Screenshots

@@ -5,15 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
-### Added
-- Placeholder for upcoming features.
-
-### Changed
-- Placeholder for upcoming improvements.
+## [1.1.0] - 2025-07-11
 
 ### Fixed
-- Placeholder for upcoming bug fixes.
+- (29) Category filter on Transaction page now only shows categories that belong to the family of the user logged in.
 
 ---
 
