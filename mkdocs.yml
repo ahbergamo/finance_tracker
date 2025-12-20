@@ -1,0 +1,82 @@
+site_name: FRacker Documentation
+site_description: Personal Finance Tracker - Self-hosted financial management application
+site_author: FRacker Team
+repo_url: https://github.com/ahbergamo/finance_tracker
+repo_name: ahbergamo/finance_tracker
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.suggest
+    - toc.follow
+    - content.code.copy
+
+plugins:
+  - search
+  - glightbox
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quick Start: getting-started/quick-start.md
+      - Raspberry Pi Deployment: getting-started/raspberry-pi.md
+      - Development Setup: getting-started/development.md
+      - Configuration: getting-started/configuration.md
+  - User Guide:
+      - Dashboard: user-guide/dashboard.md
+      - Importing Transactions: user-guide/importing-transactions.md
+      - Categories & Budgets: user-guide/categories-budgets.md
+      - Reports: user-guide/reports.md
+      - Account Types: user-guide/account-types.md
+      - Import Rules: user-guide/import-rules.md
+  - Design:
+      - Overview: design/index.md
+      - Retirement Accounts: design/retirement-accounts.md
+      - Asset Tracking: design/asset-tracking.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ahbergamo/finance_tracker
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/abergamo/finance-tracker
+  version:
+    provider: mike
