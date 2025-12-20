@@ -7,3 +7,4 @@ report_bp = Blueprint('report', __name__)
 from app.routes.reports import monthly          # noqa: E402, F401
 from app.routes.reports import annual           # noqa: E402, F401
 from app.routes.reports import income_expense   # noqa: E402, F401
+from app.routes.reports import retirement       # noqa: E402, F401

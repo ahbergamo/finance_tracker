@@ -109,9 +109,9 @@ def handle_duplicates(query, family_user_ids, category_id, category_ids, account
         return {}, None
 
 
-def process_transactions_view(filter_type, time_filter, category_id, category_ids, account_id, page, per_page):
-    current_app.logger.debug("Processing transactions view with filter_type: %s, time_filter: %s, category_id: %s, category_ids: %s, account_id: %s, page: %s, per_page: %s",
-                             filter_type, time_filter, category_id, category_ids, account_id, page, per_page)
+def process_transactions_view(filter_type, time_filter, category_id, category_ids, account_id, page, per_page, sort_by="date", sort_dir="desc"):
+    current_app.logger.debug("Processing transactions view with filter_type: %s, time_filter: %s, category_id: %s, category_ids: %s, account_id: %s, page: %s, per_page: %s, sort_by: %s, sort_dir: %s",
+                             filter_type, time_filter, category_id, category_ids, account_id, page, per_page, sort_by, sort_dir)
     family_user_ids = get_family_user_ids()
     if filter_type == "transfers":
         current_app.logger.debug("Filtering for transfers")
@@ -151,7 +151,19 @@ def process_transactions_view(filter_type, time_filter, category_id, category_id
             current_app.logger.debug("Filtering expense transactions")
             query = query.filter(Transaction.amount < 0)
         query, date_range_display = apply_time_filter(query, time_filter)
-        query = query.order_by(Transaction.timestamp.desc())
+
+        # Apply sorting
+        sort_column_map = {
+            "date": Transaction.timestamp,
+            "amount": Transaction.amount,
+            "description": Transaction.description,
+        }
+        sort_column = sort_column_map.get(sort_by, Transaction.timestamp)
+        if sort_dir == "asc":
+            query = query.order_by(sort_column.asc())
+        else:
+            query = query.order_by(sort_column.desc())
+
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         user_transactions = pagination.items
         summary = calculate_summary(query)
@@ -168,4 +180,6 @@ def process_transactions_view(filter_type, time_filter, category_id, category_id
             "pagination": pagination,
             "date_range_display": date_range_display,
             "summary": summary,
+            "sort_by": sort_by,
+            "sort_dir": sort_dir,
         }

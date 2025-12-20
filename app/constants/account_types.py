@@ -43,5 +43,41 @@ DEFAULT_ACCOUNT_TYPES = [
         "amount_field": "Amount",
         "description_field": "Name",
         "positive_expense": False,
+    },
+    # 401k Retirement Account
+    {
+        "name": "401k Account",
+        "category_field": "Type",
+        "date_field": "Date",
+        "amount_field": "Amount",
+        "description_field": "Description",
+        "positive_expense": False,
+    },
+    # Traditional IRA
+    {
+        "name": "Traditional IRA",
+        "category_field": "Type",
+        "date_field": "Date",
+        "amount_field": "Amount",
+        "description_field": "Description",
+        "positive_expense": False,
+    },
+    # Roth IRA
+    {
+        "name": "Roth IRA",
+        "category_field": "Type",
+        "date_field": "Date",
+        "amount_field": "Amount",
+        "description_field": "Description",
+        "positive_expense": False,
+    },
+    # 403b Retirement Account
+    {
+        "name": "403b Account",
+        "category_field": "Type",
+        "date_field": "Date",
+        "amount_field": "Amount",
+        "description_field": "Description",
+        "positive_expense": False,
     }
 ]

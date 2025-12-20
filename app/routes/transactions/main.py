@@ -18,8 +18,10 @@ def transactions():
     account_id = request.args.get("account_id", type=int)
     page = request.args.get("page", 1, type=int)
     per_page = session.get("per_page", current_app.config.get("PER_PAGE", 10))
+    sort_by = request.args.get("sort_by", "date")
+    sort_dir = request.args.get("sort_dir", "desc")
 
-    view_data = process_transactions_view(filter_type, time_filter, category_id, category_ids, account_id, page, per_page)
+    view_data = process_transactions_view(filter_type, time_filter, category_id, category_ids, account_id, page, per_page, sort_by, sort_dir)
     return render_template("transactions/index.html", **view_data)
 
 
