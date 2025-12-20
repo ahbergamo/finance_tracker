@@ -41,6 +41,9 @@ jobs:
       - name: Test
         run: pytest .
 
+      - name: Build Documentation
+        run: mkdocs build --strict
+
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         with:

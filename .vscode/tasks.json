@@ -142,6 +142,80 @@
       },
       "problemMatcher": [],
       "detail": "Run tests with coverage and show missing lines in HTML report."
+    },
+    {
+      "label": "MkDocs: Serve Locally",
+      "type": "shell",
+      "command": "mkdocs",
+      "args": [
+        "serve"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": true
+      },
+      "detail": "Start MkDocs development server at http://localhost:8000 (live reload enabled)"
+    },
+    {
+      "label": "MkDocs: Build Site",
+      "type": "shell",
+      "command": "mkdocs",
+      "args": [
+        "build",
+        "--clean"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Build static documentation site to ./site directory"
+    },
+    {
+      "label": "MkDocs: Deploy to GitHub Pages",
+      "type": "shell",
+      "command": "mkdocs",
+      "args": [
+        "gh-deploy",
+        "--clean"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "detail": "Build and deploy documentation to GitHub Pages (gh-pages branch)"
+    },
+    {
+      "label": "MkDocs: Open Local Docs",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "open http://localhost:8000 || xdg-open http://localhost:8000 || start http://localhost:8000"
+      ],
+      "problemMatcher": [],
+      "dependsOn": [
+        "MkDocs: Serve Locally"
+      ],
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
+      },
+      "detail": "Start MkDocs server and open in browser"
     }
   ]
 }
