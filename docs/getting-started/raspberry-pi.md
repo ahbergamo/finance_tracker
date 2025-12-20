@@ -228,7 +228,7 @@ sudo ufw allow 1310/tcp  # If using UFW firewall
 ## Security Recommendations
 
 - Change default passwords
-- Enable HTTPS with Let's Encrypt (see [Deployment Guide](../admin-guide/deployment.md#https-setup))
+- Enable HTTPS with Let's Encrypt and Certbot
 - Keep Raspberry Pi OS updated: `sudo apt update && sudo apt upgrade`
 - Use a firewall: `sudo apt install ufw && sudo ufw enable`
 
@@ -236,4 +236,4 @@ sudo ufw allow 1310/tcp  # If using UFW firewall
 
 - [Configure Account Types](configuration.md#account-types)
 - [Import Your First Transactions](../user-guide/importing-transactions.md)
-- [Set Up HTTPS](../admin-guide/deployment.md#https-setup)
+- Set up HTTPS with Let's Encrypt for secure remote access

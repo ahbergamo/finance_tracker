@@ -65,20 +65,11 @@ nav:
       - Reports: user-guide/reports.md
       - Account Types: user-guide/account-types.md
       - Import Rules: user-guide/import-rules.md
-  - Admin Guide:
-      - Deployment: admin-guide/deployment.md
-      - Database Management: admin-guide/database.md
-      - Backup & Restore: admin-guide/backup-restore.md
-      - Troubleshooting: admin-guide/troubleshooting.md
-  - Development:
-      - Architecture: development/architecture.md
-      - Testing: development/testing.md
-      - Contributing: development/contributing.md
-      - Code Style: development/code-style.md
   - Design:
       - Overview: design/index.md
       - Retirement Accounts: design/retirement-accounts.md
       - Asset Tracking: design/asset-tracking.md
+  - Contributing: contributing.md
   - Changelog: changelog.md
 
 extra:

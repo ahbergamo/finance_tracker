@@ -106,7 +106,7 @@ Multiple users can share a family account with combined financial tracking.
 - **📖 Documentation**: You're reading it!
 - **🐛 Bug Reports**: [GitHub Issues](https://github.com/ahbergamo/finance_tracker/issues)
 - **💬 Discussions**: [GitHub Discussions](https://github.com/ahbergamo/finance_tracker/discussions)
-- **🤝 Contributing**: See our [Contributing Guide](development/contributing.md)
+- **🤝 Contributing**: See our [Contributing Guide](contributing.md)
 
 ---
 

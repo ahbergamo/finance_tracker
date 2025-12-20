@@ -288,6 +288,6 @@ redis-cli ping  # Should return "PONG"
 
 ## Next Steps
 
-- Read the [Architecture Guide](../development/architecture.md)
-- Review [Contributing Guidelines](../development/contributing.md)
-- Check [Code Style Guide](../development/code-style.md)
+- Review [Contributing Guidelines](../contributing.md)
+- Check the [CLAUDE.md](https://github.com/ahbergamo/finance_tracker/blob/main/CLAUDE.md) file for codebase guidance
+- Read about the [project structure](../index.md#features)

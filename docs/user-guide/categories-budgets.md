@@ -303,6 +303,6 @@ For freelancers or variable income:
 
 ## Next Steps
 
-- [View Budget Reports](reports.md#budget-reports)
+- [View Budget Reports](reports.md)
 - [Set Up Import Rules](import-rules.md) for accurate categorization
 - [Import Transactions](importing-transactions.md) to track against budgets

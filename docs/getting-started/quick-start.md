@@ -137,4 +137,4 @@ docker-compose logs db
 
 ### Need More Help?
 
-See the [Troubleshooting Guide](../admin-guide/troubleshooting.md) or [open an issue](https://github.com/ahbergamo/finance_tracker/issues).
+Please [open an issue](https://github.com/ahbergamo/finance_tracker/issues) or check the project's [GitHub discussions](https://github.com/ahbergamo/finance_tracker/discussions).
