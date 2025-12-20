@@ -1,8 +1,7 @@
 import calendar
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import extract, func, and_, or_
-from flask import current_app
+from sqlalchemy import extract, func, or_
 from app import db
 from app.models.transaction import Transaction
 from app.models.user import User
@@ -38,14 +37,14 @@ def get_retirement_categories(family_id):
 def get_retirement_summary(current_user, start_date, end_date):
     """Generate retirement account summary data."""
     family_filter = get_family_filter(current_user)
-    
+
     # Get retirement accounts and categories
     retirement_accounts = get_retirement_accounts(current_user.family_id)
     retirement_categories = get_retirement_categories(current_user.family_id)
-    
+
     account_ids = [acc.id for acc in retirement_accounts]
     category_ids = [cat.id for cat in retirement_categories]
-    
+
     # Query transactions from retirement accounts OR retirement categories
     query = db.session.query(Transaction).filter(
         family_filter,
@@ -56,36 +55,36 @@ def get_retirement_summary(current_user, start_date, end_date):
             Transaction.category_id.in_(category_ids)
         )
     )
-    
+
     transactions = query.all()
-    
+
     # Group by account and category
     summary = {}
     total_contributions = 0
     total_withdrawals = 0
-    
+
     for transaction in transactions:
         account_name = transaction.account.name
         category_name = transaction.category.name
-        
+
         if account_name not in summary:
             summary[account_name] = {
                 'categories': {},
                 'total': 0
             }
-        
+
         if category_name not in summary[account_name]['categories']:
             summary[account_name]['categories'][category_name] = 0
-        
+
         summary[account_name]['categories'][category_name] += transaction.amount
         summary[account_name]['total'] += transaction.amount
-        
+
         # Track contributions vs withdrawals
         if transaction.amount > 0:
             total_contributions += transaction.amount
         else:
             total_withdrawals += abs(transaction.amount)
-    
+
     return {
         'summary': summary,
         'total_contributions': total_contributions,
@@ -97,13 +96,13 @@ def get_retirement_summary(current_user, start_date, end_date):
 def get_retirement_chart_data(current_user, start_date, end_date):
     """Generate chart data for retirement contributions over time."""
     family_filter = get_family_filter(current_user)
-    
+
     retirement_accounts = get_retirement_accounts(current_user.family_id)
     retirement_categories = get_retirement_categories(current_user.family_id)
-    
+
     account_ids = [acc.id for acc in retirement_accounts]
     category_ids = [cat.id for cat in retirement_categories]
-    
+
     # Query monthly retirement activity
     chart_query = db.session.query(
         extract('year', Transaction.timestamp).label('year'),
@@ -118,17 +117,17 @@ def get_retirement_chart_data(current_user, start_date, end_date):
             Transaction.category_id.in_(category_ids)
         )
     ).group_by('year', 'month').order_by('year', 'month')
-    
+
     results = chart_query.all()
-    
+
     labels = []
     totals = []
-    
+
     for row in results:
         label = f"{int(row.year)}-{int(row.month):02d} ({calendar.month_abbr[int(row.month)]})"
         labels.append(label)
         totals.append(float(row.total) if row.total else 0)
-    
+
     return labels, totals
 
 
@@ -136,10 +135,9 @@ def get_retirement_account_balances(current_user, end_date):
     """Calculate retirement account balances up to end_date."""
     family_filter = get_family_filter(current_user)
     retirement_accounts = get_retirement_accounts(current_user.family_id)
-    account_ids = [acc.id for acc in retirement_accounts]
-    
+
     balances = {}
-    
+
     for account in retirement_accounts:
         # Sum all transactions for this account up to end_date
         total = db.session.query(func.sum(Transaction.amount)).filter(
@@ -147,9 +145,9 @@ def get_retirement_account_balances(current_user, end_date):
             Transaction.account_id == account.id,
             Transaction.timestamp <= end_date
         ).scalar() or 0
-        
+
         balances[account.name] = total
-    
+
     return balances
 
 

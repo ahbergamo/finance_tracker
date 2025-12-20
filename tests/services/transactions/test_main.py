@@ -130,10 +130,12 @@ class TestMainService(unittest.TestCase):
                     result = process_transactions_view(filter_type, time_filter, category_id, category_ids, account_id, page, per_page)
             expected_keys = {"transactions", "account_types", "selected_account", "categories",
                              "selected_category", "filter_type", "time_filter", "pagination",
-                             "date_range_display", "summary"}
+                             "date_range_display", "summary", "sort_by", "sort_dir"}
             self.assertEqual(set(result.keys()), expected_keys)
             self.assertEqual(result["date_range_display"], "dummy_range")
             self.assertEqual(result["summary"], "dummy_summary")
+            self.assertEqual(result["sort_by"], "date")
+            self.assertEqual(result["sort_dir"], "desc")
 
     @patch("app.services.transactions.main.handle_duplicates", return_value=({}, "dup_summary"))
     @patch("app.services.transactions.main.get_family_user_ids", side_effect=dummy_get_family_user_ids)
