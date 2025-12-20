@@ -13,9 +13,10 @@
       "extensions": [
         "ms-python.python",
         "ms-python.debugpy",
-        "ms-azuretools.vscode-docker"
+        "ms-azuretools.vscode-docker",
+        "Anthropic.claude-code"
       ]
     }
   },
-  "postCreateCommand": "pip install -r requirements.txt; pip install debugpy"
+  "postCreateCommand": "pip install -r requirements.txt; pip install debugpy mysql-connector-python"
 }

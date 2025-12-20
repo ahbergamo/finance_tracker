@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Retirement Report{% endblock %}
+{% block extra_head %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+{% block content %}
+<div class="container">
+  <h1 class="mb-4">Retirement Report</h1>
+  
+  <!-- Date Range Filter -->
+  <form method="GET" action="{{ url_for('report.retirement_report') }}" class="row g-3 mb-4">
+    <div class="col-md-3">
+      <label for="start_date" class="form-label">Start Date</label>
+      <input type="date" name="start_date" id="start_date" class="form-control" value="{{ start_date }}">
+    </div>
+    <div class="col-md-3">
+      <label for="end_date" class="form-label">End Date</label>
+      <input type="date" name="end_date" id="end_date" class="form-control" value="{{ end_date }}">
+    </div>
+    <div class="col-md-3">
+      <label for="time_filter" class="form-label">Quick Filter</label>
+      <select name="time_filter" id="time_filter" class="form-select">
+        <option value="custom" {% if time_filter == 'custom' %}selected{% endif %}>Custom Range</option>
+        <option value="year" {% if time_filter == 'year' %}selected{% endif %}>Last 12 Months</option>
+        <option value="ytd" {% if time_filter == 'ytd' %}selected{% endif %}>Year to Date</option>
+      </select>
+    </div>
+    <div class="col-md-3 align-self-end">
+      <button type="submit" class="btn btn-primary">Apply Filter</button>
+    </div>
+  </form>
+
+  <!-- Summary Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Total Contributions</h5>
+          <h3 class="text-success">${{ "{:,.2f}".format(summary_data.total_contributions) }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Total Withdrawals</h5>
+          <h3 class="text-danger">${{ "{:,.2f}".format(summary_data.total_withdrawals) }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Net Change</h5>
+          <h3 class="{% if summary_data.net_change >= 0 %}text-success{% else %}text-danger{% endif %}">
+            ${{ "{:,.2f}".format(summary_data.net_change) }}
+          </h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h5 class="card-title">Date Range</h5>
+          <p class="card-text">{{ date_range_display }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Balances -->
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5>Current Account Balances</h5>
+        </div>
+        <div class="card-body">
+          {% if account_balances %}
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Account</th>
+                  <th class="text-end">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for account_name, balance in account_balances.items() %}
+                <tr>
+                  <td>{{ account_name }}</td>
+                  <td class="text-end {% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    ${{ "{:,.2f}".format(balance) }}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="text-muted">No retirement accounts found.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <!-- Activity Chart -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h5>Monthly Activity</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="retirementChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Breakdown -->
+  <div class="card">
+    <div class="card-header">
+      <h5>Detailed Breakdown by Account</h5>
+    </div>
+    <div class="card-body">
+      {% if summary_data.summary %}
+        {% for account_name, account_data in summary_data.summary.items() %}
+        <div class="mb-4">
+          <h6>{{ account_name }} 
+            <span class="badge {% if account_data.total >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+              ${{ "{:,.2f}".format(account_data.total) }}
+            </span>
+          </h6>
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th class="text-end">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for category_name, amount in account_data.categories.items() %}
+              <tr>
+                <td>{{ category_name }}</td>
+                <td class="text-end {% if amount >= 0 %}text-success{% else %}text-danger{% endif %}">
+                  ${{ "{:,.2f}".format(amount) }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="text-muted">No retirement activity found for the selected date range.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Retirement Activity Chart
+  const ctx = document.getElementById('retirementChart').getContext('2d');
+  const retirementChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ labels|tojson }},
+      datasets: [{
+        label: 'Net Activity',
+        data: {{ totals|tojson }},
+        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return '$' + value.toLocaleString();
+            }
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return 'Net Activity: $' + context.parsed.y.toLocaleString();
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Time filter change handler
+  document.getElementById('time_filter').addEventListener('change', function() {
+    const timeFilter = this.value;
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    
+    if (timeFilter !== 'custom') {
+      startDate.disabled = true;
+      endDate.disabled = true;
+    } else {
+      startDate.disabled = false;
+      endDate.disabled = false;
+    }
+  });
+
+  // Initialize disabled state
+  document.addEventListener('DOMContentLoaded', function() {
+    const timeFilter = document.getElementById('time_filter').value;
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    
+    if (timeFilter !== 'custom') {
+      startDate.disabled = true;
+      endDate.disabled = true;
+    }
+  });
+</script>
+{% endblock %}

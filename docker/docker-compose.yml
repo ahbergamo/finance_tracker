@@ -1,6 +1,6 @@
 services:
   finance_tracker:
-    container_name: finance_tracker  
+    container_name: finance_tracker
     build: .
     expose:
       - "5000"  # only exposed internally
@@ -9,7 +9,7 @@ services:
       SECRET_KEY: "${SECRET_KEY}"
       DB_USER: "${DB_USER}"
       DB_PASSWORD: "${DB_PASSWORD}"
-      DB_HOST: "${DB_HOST}"
+      DB_HOST: "${DB_HOST}"  # Use MySQL host from .env
       DB_PORT: "${DB_PORT}"
       DB_NAME: "${DB_NAME}"
       SSL_CERT_PATH: "${SSL_CERT_PATH}"
@@ -42,3 +42,17 @@ services:
     ports:
       - "6379:6379"
     restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    restart: unless-stopped
+
+volumes:
+  portainer_data:

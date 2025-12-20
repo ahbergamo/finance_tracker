@@ -22,6 +22,17 @@ RUN pip install pytest
 # Install debugpy for debugging
 RUN pip install debugpy
 
+# Install Node.js 18.x and npm
+RUN apt-get update \
+    && apt-get install -y curl ca-certificates gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code CLI globally
+RUN npm install -g @anthropic-ai/claude-code
+
 # Expose the debug port
 EXPOSE 5678
 
