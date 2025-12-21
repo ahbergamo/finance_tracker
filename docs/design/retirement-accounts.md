@@ -1,12 +1,14 @@
-# Retirement Accounts Design
+# Retirement Accounts Enhancement
 
 **Status:** 🟡 Draft
 **Created:** 2025-12-20
+**Updated:** 2025-12-20
 **Author:** FRacker Team
+**Depends On:** [account-management.md](account-management.md)
 
 ## Overview
 
-Add comprehensive retirement and investment account tracking to FRacker, enabling users to monitor 401(k), IRA, and other long-term savings accounts alongside their regular transactions.
+Enhance FRacker's retirement account tracking with advanced features like contribution tracking, goal projections, and asset allocation. This builds upon the Account Management system to provide retirement-specific functionality.
 
 ### Goals
 
@@ -31,51 +33,73 @@ Add comprehensive retirement and investment account tracking to FRacker, enablin
 4. As a user, I want to track multiple retirement accounts (401k, Traditional IRA, Roth IRA)
 5. As a user, I want to see my total net worth including retirement accounts
 
-## Current State
+## Prerequisites
 
-FRacker currently has:
+This feature **requires** the Account Management system to be implemented first (see [account-management.md](account-management.md)). Key prerequisites:
+
+- `account` table with `account_category='retirement'`
+- `account_balance_history` table for balance snapshots
+- Account creation and balance update UI
+
+## Current State (Post-Account Management)
+
+What will exist after Account Management is implemented:
+- Users can create retirement accounts (401k, IRA, Roth IRA, etc.)
+- `account_balance_history` table tracks balance updates
+- `/accounts/<id>` page shows balance history
 - `/reports/retirement` route (partially implemented)
-- Retirement categories in the default category list
-- Basic retirement account types
 
-Missing:
-- Balance tracking over time
-- Dedicated retirement account management UI
-- Historical balance data
-- Asset allocation tracking
+What this enhancement adds:
+- Contribution tracking (separate from market gains)
+- Employer match tracking
+- Contribution limit warnings (IRS limits)
+- Retirement goal projections
+- Asset allocation visualization
+- Enhanced retirement report page
 
 ## Proposed Solution
 
 ### Database Schema Changes
 
-#### New Table: `retirement_balance`
+#### New Table: `retirement_contribution`
 
-Tracks balance snapshots over time:
+Track contributions separately from balance updates:
 
 ```sql
-CREATE TABLE retirement_balance (
+CREATE TABLE retirement_contribution (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT NOT NULL,  -- FK to account_type or new retirement_account table
-    user_id INT NOT NULL,     -- FK to user
-    balance DECIMAL(15, 2) NOT NULL,
-    as_of_date DATE NOT NULL,
+    account_id INT NOT NULL,                             -- FK to account (must be category='retirement')
+    contribution_date DATE NOT NULL,
+    employee_contribution DECIMAL(15, 2) DEFAULT 0.00,   -- Employee contribution
+    employer_match DECIMAL(15, 2) DEFAULT 0.00,          -- Employer match
+    contribution_type ENUM('regular', 'catchup', 'rollover') DEFAULT 'regular',
+    notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (account_id) REFERENCES account_type(id),
-    FOREIGN KEY (user_id) REFERENCES user(id),
-    UNIQUE KEY unique_balance (account_id, as_of_date)
+    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE,
+    INDEX idx_account_date (account_id, contribution_date)
 );
 ```
 
-#### Alternative: Extend `account_type` table
+#### New Table: `retirement_goal`
 
-Add retirement-specific fields:
+Track retirement savings goals:
 
 ```sql
-ALTER TABLE account_type ADD COLUMN is_retirement BOOLEAN DEFAULT FALSE;
-ALTER TABLE account_type ADD COLUMN current_balance DECIMAL(15, 2);
-ALTER TABLE account_type ADD COLUMN last_balance_update DATE;
+CREATE TABLE retirement_goal (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    family_id INT NOT NULL,
+    target_amount DECIMAL(15, 2) NOT NULL,               -- Goal amount
+    target_date DATE NOT NULL,                           -- Target retirement date
+    monthly_contribution_goal DECIMAL(15, 2),            -- Suggested monthly contribution
+    expected_return_rate DECIMAL(5, 2),                  -- Expected annual return (%)
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (family_id) REFERENCES family(id) ON DELETE CASCADE
+);
 ```
+
+**Note:** The `account_balance_history` table from Account Management is used for balance tracking, not a separate `retirement_balance` table.
 
 ### User Interface
 
@@ -140,39 +164,51 @@ DELETE /api/retirement/balance/<id>
 
 ## Implementation Plan
 
-### Phase 1: Data Model (Week 1)
-- [ ] Create `retirement_balance` table migration
-- [ ] Create `RetirementBalance` model
-- [ ] Add model tests
-- [ ] Seed sample data for testing
+**Note:** This implementation assumes Account Management is complete.
 
-### Phase 2: Backend Services (Week 2)
-- [ ] Create retirement service layer
-- [ ] Implement balance CRUD operations
-- [ ] Add balance history queries
-- [ ] Create API endpoints
-- [ ] Add service tests
+### Phase 1: Contribution Tracking
+- [ ] Create `retirement_contribution` table migration
+- [ ] Create `RetirementContribution` model
+- [ ] Add contribution CRUD operations
+- [ ] Create contribution entry form
+- [ ] Link contributions to transactions (optional)
+- [ ] Add model and service tests
 
-### Phase 3: User Interface (Week 3)
-- [ ] Create retirement accounts list page
-- [ ] Add balance update form
-- [ ] Implement balance history charts
-- [ ] Enhanced retirement report page
-- [ ] Add navigation links
+### Phase 2: Retirement Goals
+- [ ] Create `retirement_goal` table migration
+- [ ] Create `RetirementGoal` model
+- [ ] Add goal management UI
+- [ ] Implement projection calculator
+- [ ] Add progress tracking
+- [ ] Add goal tests
 
-### Phase 4: Testing & Polish (Week 4)
-- [ ] Integration tests
+### Phase 3: Enhanced Reporting
+- [ ] Expand `/reports/retirement` page
+- [ ] Add contribution vs balance growth chart
+- [ ] Implement asset allocation tracking (future)
+- [ ] Add year-to-date contribution summary
+- [ ] IRS contribution limit warnings
+
+### Phase 4: Testing & Polish
+- [ ] Integration tests for contribution tracking
+- [ ] Goal projection accuracy tests
 - [ ] UI/UX refinements
 - [ ] Documentation updates
 - [ ] Performance optimization
 
+## Dependencies
+
+- **Depends On:** [account-management.md](account-management.md) - MUST be implemented first
+- **Required By:** None (optional enhancement)
+- **Related To:** [asset-management.md](asset-management.md) - Net worth calculation
+
 ## Alternatives Considered
 
-### Option 1: Use Transactions for Balances
-**Approach:** Store balances as special transaction types
-**Pros:** Reuses existing infrastructure
-**Cons:** Transactions are flow-based, not balance-based; confusing semantics
-**Decision:** Rejected - balances are fundamentally different from transactions
+### Option 1: Separate Retirement Balance Table
+**Approach:** Create `retirement_balance` table separate from `account_balance_history`
+**Pros:** Retirement-specific schema
+**Cons:** Duplication, Account Management already provides this
+**Decision:** Rejected - use `account_balance_history` from Account Management
 
 ### Option 2: External Service Integration
 **Approach:** Integrate with Plaid or similar for automatic balance updates
@@ -184,7 +220,7 @@ DELETE /api/retirement/balance/<id>
 **Approach:** Track individual holdings, shares, cost basis
 **Pros:** Complete portfolio management
 **Cons:** Significant complexity, scope creep
-**Decision:** Out of scope - focus on balance tracking first
+**Decision:** Out of scope - focus on balance and contribution tracking first
 
 ## Open Questions
 

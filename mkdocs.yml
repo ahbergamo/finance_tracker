@@ -67,8 +67,10 @@ nav:
       - Import Rules: user-guide/import-rules.md
   - Design:
       - Overview: design/index.md
+      - Transaction Management: design/transaction-management.md
+      - Account Management: design/account-management.md
       - Retirement Accounts: design/retirement-accounts.md
-      - Asset Tracking: design/asset-tracking.md
+      - Asset Management: design/asset-management.md
   - Contributing: contributing.md
   - Changelog: changelog.md
 

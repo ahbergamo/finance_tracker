@@ -11,10 +11,31 @@ Design documents help us:
 - Gather feedback from contributors
 - Maintain a record of design evolution
 
-## Active Design Documents
+## Design Documents
 
-- [Retirement Accounts](retirement-accounts.md) - Track retirement account balances and contributions
-- [Asset Tracking](asset-tracking.md) - Comprehensive asset management system
+### Implemented Features
+
+- [Transaction Management](transaction-management.md) - Current transaction-based accounting system (✅ Implemented)
+
+### In Review
+
+- [Account Management](account-management.md) - Separate accounts from CSV templates, enable multiple accounts per type (🔵 In Review)
+
+### Planned Enhancements
+
+- [Retirement Accounts Enhancement](retirement-accounts.md) - Advanced retirement tracking with contribution goals and projections (🟡 Draft, depends on Account Management)
+- [Asset Management](asset-management.md) - Track physical assets and net worth (🟡 Draft)
+
+### Document Dependencies
+
+```
+transaction-management.md (✅ Implemented)
+    ↓
+account-management.md (🔵 In Review) ← We are here
+    ↓
+    ├─→ retirement-accounts.md (🟡 Draft)
+    └─→ asset-management.md (🟡 Draft)
+```
 
 ## Design Document Template
 
