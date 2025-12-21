@@ -1,4 +1,4 @@
-# Asset Tracking Design
+# Asset Management System
 
 **Status:** 🟡 Draft
 **Created:** 2025-12-20

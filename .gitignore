@@ -76,3 +76,6 @@ logs/
 deploy_pi_local.sh
 coverage_html
 utilities/
+
+# MkDocs build output
+site/
