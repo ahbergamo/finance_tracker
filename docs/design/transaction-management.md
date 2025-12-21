@@ -92,7 +92,7 @@ class AccountType(db.Model):
 1. **CSV Import Template**: Defines how to parse bank CSV files
 2. **Account Identifier**: Transactions link to AccountType to indicate which "account" they belong to
 
-**Limitation:** Cannot have multiple accounts of the same type (e.g., two Chase checking accounts)
+**Note:** You can have multiple accounts with the same CSV format by simply using different names (e.g., "Chase Checking - Personal", "Chase Checking - Business").
 
 #### Budget Model
 
@@ -362,20 +362,18 @@ transactions = Transaction.query.join(Transaction.category).filter(
 
 ## Known Limitations
 
-1. **AccountType Dual Role**: Currently serves as both CSV template and account identifier
-   - Cannot have multiple accounts of the same type
-   - Confusing semantics ("account" vs "import template")
-   - **Resolution**: See [account-management.md](account-management.md)
+1. **AccountType Naming**: Model name is confusing ("AccountType" vs "Account")
+   - Will be renamed to "Account" in account-management update
+   - See [account-management.md](account-management.md)
 
-2. **No Account Balances**: System doesn't track running balances
-   - Balance must be calculated by summing transactions
-   - No historical balance snapshots
+2. **No Initial Balance**: System doesn't support seeding accounts with initial balances
+   - Balance = sum of imported transactions only
    - **Resolution**: See [account-management.md](account-management.md)
 
 3. **Limited Asset Tracking**: Only transaction-based accounts
-   - Cannot track retirement accounts (need periodic value updates)
-   - Cannot track physical assets (home, vehicles)
-   - **Resolution**: See [retirement-accounts.md](retirement-accounts.md) and [asset-management.md](asset-management.md)
+   - Cannot track retirement accounts (need periodic balance snapshots)
+   - Cannot track brokerage accounts or physical assets
+   - **Resolution**: See [account-management.md](account-management.md) for balance-based accounts
 
 4. **No Reconciliation**: No bank statement reconciliation feature
    - Cannot mark transactions as "cleared" or "reconciled"
@@ -391,21 +389,22 @@ transactions = Transaction.query.join(Transaction.category).filter(
 The following features are planned or under consideration:
 
 1. **Account Management** (🔵 In Review)
-   - Separate Account model from AccountType
-   - Support multiple accounts of the same type
-   - Track account balances and history
+   - Rename AccountType to Account
+   - Add account_type enum (checking, savings, credit_card, retirement, brokerage)
+   - Add initial_balance for seeding accounts
+   - Add balance history tracking for retirement/brokerage accounts
    - See [account-management.md](account-management.md)
 
 2. **Retirement Accounts** (🟡 Draft)
-   - Track retirement account balances over time
-   - Support 401(k), IRA, Roth IRA, etc.
-   - Contribution tracking and reporting
+   - Contribution tracking (employee + employer match)
+   - IRS limit warnings
+   - Retirement goal projections
    - See [retirement-accounts.md](retirement-accounts.md)
 
 3. **Asset Management** (🟡 Draft)
    - Track physical assets (home, vehicles, valuables)
-   - Value depreciation/appreciation over time
-   - Net worth calculation
+   - Uses same balance history pattern as retirement/brokerage
+   - Net worth calculation across all accounts
    - See [asset-management.md](asset-management.md)
 
 4. **Advanced Reporting**

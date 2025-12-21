@@ -49,7 +49,7 @@ class DummyCategory:
         return dummy
 
 
-class DummyAccountType:
+class DummyAccount:
     @classmethod
     def query(cls):
         return cls
@@ -137,8 +137,8 @@ class TestBulkDeleteService(unittest.TestCase):
 
     @patch("app.services.transactions.bulk_delete.render_template", return_value="bulk_delete_page")
     @patch("app.services.transactions.bulk_delete.Category")
-    @patch("app.services.transactions.bulk_delete.AccountType")
-    def test_render_bulk_delete_page_success(self, mock_AccountType, mock_Category, mock_render_template):
+    @patch("app.services.transactions.bulk_delete.Account")
+    def test_render_bulk_delete_page_success(self, mock_Account, mock_Category, mock_render_template):
         with self.app.test_request_context("/bulk_delete?page=2"):
             filters = {
                 "start_date": "2023-01-01",
@@ -148,7 +148,7 @@ class TestBulkDeleteService(unittest.TestCase):
             }
             dummy_query = DummyTransactionQuery()
             mock_Category.query.filter_by.return_value.order_by.return_value.all.return_value = ["Cat1", "Cat2"]
-            mock_AccountType.query.filter_by.return_value.order_by.return_value.all.return_value = ["Acc1", "Acc2"]
+            mock_Account.query.filter_by.return_value.order_by.return_value.all.return_value = ["Acc1", "Acc2"]
             result = render_bulk_delete_page(dummy_query, filters)
             mock_render_template.assert_called()
             self.assertEqual(result, "bulk_delete_page")

@@ -1,12 +1,12 @@
 from flask import render_template, redirect, url_for, flash, Blueprint, current_app
 from flask_login import current_user, login_required
 from app import db
-from app.models.account_type import AccountType
+from app.models.account import Account
 from app.models.pre_defined_account import PreDefinedAccount
 from app.forms.account_type_form import AccountTypeForm
 
 
-# Blueprint for account types
+# Blueprint for account types (keeping URL structure for backward compatibility)
 account_types_bp = Blueprint('account_types', __name__, template_folder='../templates/account_types')
 
 
@@ -17,11 +17,11 @@ def index():
     List all account types for the current user's family.
     """
     try:
-        account_types = AccountType.query.filter_by(family_id=current_user.family_id).all()
-        current_app.logger.info("Listing %d account types for family_id %s", len(account_types), current_user.family_id)
+        account_types = Account.query.filter_by(family_id=current_user.family_id).all()
+        current_app.logger.info("Listing %d accounts for family_id %s", len(account_types), current_user.family_id)
     except Exception as e:
-        current_app.logger.error("Error fetching account types: %s", str(e))
-        flash('An error occurred while fetching account types.', 'danger')
+        current_app.logger.error("Error fetching accounts: %s", str(e))
+        flash('An error occurred while fetching accounts.', 'danger')
         account_types = []
     return render_template('account_types/index.html', account_types=account_types)
 
@@ -55,25 +55,28 @@ def fetch_pre_defined_accounts():
 
 def create_account_type(form):
     """
-    Create a new account type in the database.
+    Create a new account in the database.
     """
     try:
-        account_type = AccountType(
+        account = Account(
             name=form.name.data,
             category_field=form.category_field.data,
             date_field=form.date_field.data,
             amount_field=form.amount_field.data,
             description_field=form.description_field.data,
             positive_expense=form.positive_expense.data,
+            account_type=form.account_type.data,
+            retirement_type=form.retirement_type.data if form.account_type.data == 'retirement' else None,
+            initial_balance=form.initial_balance.data or 0,
             family_id=current_user.family_id
         )
-        db.session.add(account_type)
+        db.session.add(account)
         db.session.commit()
-        current_app.logger.info("Added new account type: %s for family_id %s", account_type.name, current_user.family_id)
+        current_app.logger.info("Added new account: %s for family_id %s", account.name, current_user.family_id)
         return True
     except Exception as e:
-        current_app.logger.error("Error adding account type: %s", str(e))
-        flash('An error occurred while adding the account type.', 'danger')
+        current_app.logger.error("Error adding account: %s", str(e))
+        flash('An error occurred while adding the account.', 'danger')
         db.session.rollback()
         return False
 
@@ -97,19 +100,19 @@ def edit_account_type(id):
 
 def fetch_account_type(id):
     """
-    Fetch an account type by ID for the current user's family.
+    Fetch an account by ID for the current user's family.
     """
     try:
-        return AccountType.query.filter_by(id=id, family_id=current_user.family_id).first_or_404()
+        return Account.query.filter_by(id=id, family_id=current_user.family_id).first_or_404()
     except Exception as e:
-        current_app.logger.error("Error fetching account type with ID %d: %s", id, str(e))
-        flash('An error occurred while fetching the account type.', 'danger')
+        current_app.logger.error("Error fetching account with ID %d: %s", id, str(e))
+        flash('An error occurred while fetching the account.', 'danger')
         return None
 
 
 def update_account_type(account_type, form):
     """
-    Update an existing account type in the database.
+    Update an existing account in the database.
     """
     try:
         account_type.name = form.name.data
@@ -117,12 +120,16 @@ def update_account_type(account_type, form):
         account_type.date_field = form.date_field.data
         account_type.amount_field = form.amount_field.data
         account_type.description_field = form.description_field.data
+        account_type.positive_expense = form.positive_expense.data
+        account_type.account_type = form.account_type.data
+        account_type.retirement_type = form.retirement_type.data if form.account_type.data == 'retirement' else None
+        account_type.initial_balance = form.initial_balance.data or 0
         db.session.commit()
-        current_app.logger.info("Updated account type: %s (ID: %d) for family_id %s", account_type.name, account_type.id, current_user.family_id)
+        current_app.logger.info("Updated account: %s (ID: %d) for family_id %s", account_type.name, account_type.id, current_user.family_id)
         return True
     except Exception as e:
-        current_app.logger.error("Error updating account type: %s", str(e))
-        flash('An error occurred while updating the account type.', 'danger')
+        current_app.logger.error("Error updating account: %s", str(e))
+        flash('An error occurred while updating the account.', 'danger')
         db.session.rollback()
         return False
 
@@ -143,15 +150,15 @@ def delete_account_type(id):
 
 def delete_account_type_from_db(account_type):
     """
-    Delete an account type from the database.
+    Delete an account from the database.
     """
     try:
         db.session.delete(account_type)
         db.session.commit()
-        current_app.logger.info("Deleted account type: %s (ID: %d) for family_id %s", account_type.name, account_type.id, current_user.family_id)
+        current_app.logger.info("Deleted account: %s (ID: %d) for family_id %s", account_type.name, account_type.id, current_user.family_id)
         return True
     except Exception as e:
-        current_app.logger.error("Error deleting account type: %s", str(e))
-        flash('An error occurred while deleting the account type.', 'danger')
+        current_app.logger.error("Error deleting account: %s", str(e))
+        flash('An error occurred while deleting the account.', 'danger')
         db.session.rollback()
         return False

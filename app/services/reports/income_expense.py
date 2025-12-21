@@ -7,7 +7,7 @@ from app import db
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.models.category import Category
-from app.models.account_type import AccountType
+from app.models.account import Account
 
 
 def get_date_filters(request_args):
@@ -156,7 +156,7 @@ def get_cached_accounts(current_user):
     Retrieve and cache the list of accounts for the current user's family.
     """
     try:
-        accounts = AccountType.query.filter_by(family_id=current_user.family_id).all()
+        accounts = Account.query.filter_by(family_id=current_user.family_id).all()
         current_app.logger.debug("Loaded %d accounts for family_id %s", len(accounts), current_user.family_id)
         return accounts
     except SQLAlchemyError as e:

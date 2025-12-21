@@ -1,32 +1,73 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Edit Account Type: {{ account_type.name }}</h1>
+<h1>Edit Account: {{ account_type.name }}</h1>
 <form method="POST">
   {{ form.hidden_tag() }}
-  <p>
-    {{ form.name.label }}<br>
-    {{ form.name(size=32) }}
-  </p>
-  <p>
-    {{ form.category_field.label }}<br>
-    {{ form.category_field(size=32) }}
-  </p>
-  <p>
-    {{ form.date_field.label }}<br>
-    {{ form.date_field(size=32) }}
-  </p>
-  <p>
-    {{ form.amount_field.label }}<br>
-    {{ form.amount_field(size=32) }}
-  </p>
-  <p>
-    {{ form.description_field.label }}<br>
-    {{ form.description_field(size=32) }}
-  </p>
-  <p>
-    {{ form.positive_expense.label }} {{ form.positive_expense() }}
-  </p>
-  <p>{{ form.submit() }}</p>
+
+  <div class="mb-3">
+    {{ form.name.label(class="form-label") }}
+    {{ form.name(class="form-control form-control-sm") }}
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      {{ form.account_type.label(class="form-label") }}
+      {{ form.account_type(class="form-select form-select-sm", id="account-type-select") }}
+    </div>
+    <div class="col-md-4" id="retirement-type-container" {% if account_type.account_type != 'retirement' %}style="display: none;"{% endif %}>
+      {{ form.retirement_type.label(class="form-label") }}
+      {{ form.retirement_type(class="form-select form-select-sm") }}
+    </div>
+    <div class="col-md-4">
+      {{ form.initial_balance.label(class="form-label") }}
+      <div class="input-group input-group-sm">
+        <span class="input-group-text">$</span>
+        {{ form.initial_balance(class="form-control form-control-sm", step="0.01") }}
+      </div>
+    </div>
+  </div>
+
+  <div id="csv-fields">
+    <h5 class="mt-4 mb-3">CSV Import Settings</h5>
+    <p class="text-muted small">Configure how to parse CSV files for this account. Optional for retirement/brokerage accounts.</p>
+
+    <div class="mb-3">
+      {{ form.category_field.label(class="form-label") }}
+      {{ form.category_field(class="form-control form-control-sm") }}
+    </div>
+    <div class="mb-3">
+      {{ form.date_field.label(class="form-label") }}
+      {{ form.date_field(class="form-control form-control-sm") }}
+    </div>
+    <div class="mb-3">
+      {{ form.amount_field.label(class="form-label") }}
+      {{ form.amount_field(class="form-control form-control-sm") }}
+    </div>
+    <div class="mb-3">
+      {{ form.description_field.label(class="form-label") }}
+      {{ form.description_field(class="form-control form-control-sm") }}
+    </div>
+    <div class="form-check mb-3">
+      {{ form.positive_expense(class="form-check-input") }}
+      {{ form.positive_expense.label(class="form-check-label") }}
+    </div>
+  </div>
+
+  <div>
+    {{ form.submit(class="btn btn-primary") }}
+    <a href="{{ url_for('account_types.index') }}" class="btn btn-secondary">Cancel</a>
+  </div>
 </form>
-<a href="{{ url_for('account_types.index') }}">Back to Account Types</a>
+
+<script>
+  // Show/hide retirement type based on account type selection
+  document.getElementById('account-type-select').addEventListener('change', function() {
+    var retirementContainer = document.getElementById('retirement-type-container');
+    if (this.value === 'retirement') {
+      retirementContainer.style.display = 'block';
+    } else {
+      retirementContainer.style.display = 'none';
+    }
+  });
+</script>
 {% endblock %}

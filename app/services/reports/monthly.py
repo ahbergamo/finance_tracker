@@ -7,7 +7,7 @@ from app import db
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.models.category import Category
-from app.models.account_type import AccountType
+from app.models.account import Account
 
 
 def get_date_range(today, time_filter, start_date_str=None, end_date_str=None):
@@ -153,7 +153,7 @@ def get_dropdown_options(current_user):
     current_app.logger.debug("Retrieving dropdown options for user: %s", current_user.id)
     if current_user.family_id:
         categories = Category.query.filter_by(family_id=current_user.family_id).all()
-        accounts = AccountType.query.filter_by(family_id=current_user.family_id).all()
+        accounts = Account.query.filter_by(family_id=current_user.family_id).all()
         current_app.logger.debug("Found %d categories and %d accounts for family_id: %s",
                                  len(categories), len(accounts), current_user.family_id)
     else:

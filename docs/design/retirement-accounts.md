@@ -2,21 +2,21 @@
 
 **Status:** 🟡 Draft
 **Created:** 2025-12-20
-**Updated:** 2025-12-20
+**Updated:** 2025-12-21
 **Author:** FRacker Team
 **Depends On:** [account-management.md](account-management.md)
 
 ## Overview
 
-Enhance FRacker's retirement account tracking with advanced features like contribution tracking, goal projections, and asset allocation. This builds upon the Account Management system to provide retirement-specific functionality.
+Enhance FRacker's retirement account tracking with contribution tracking, goal projections, and reporting. This builds upon the Account Management system which provides balance history tracking.
 
 ### Goals
 
-- Track retirement account balances over time
-- Record contributions and withdrawals
-- Visualize growth and allocation
-- Support multiple retirement account types
+- Track retirement contributions separately from market gains
+- Record employer matches
+- Warn when approaching IRS contribution limits
 - Calculate progress toward retirement goals
+- Visualize growth over time
 
 ### Non-Goals (for initial implementation)
 
@@ -24,270 +24,297 @@ Enhance FRacker's retirement account tracking with advanced features like contri
 - Automated brokerage imports
 - Tax calculation or reporting
 - Investment recommendations
-
-## User Stories
-
-1. As a user, I want to track my 401(k) balance so I can see my retirement savings grow
-2. As a user, I want to record contributions and employer matches
-3. As a user, I want to see charts of my retirement account balances over time
-4. As a user, I want to track multiple retirement accounts (401k, Traditional IRA, Roth IRA)
-5. As a user, I want to see my total net worth including retirement accounts
+- Individual holdings tracking
 
 ## Prerequisites
 
-This feature **requires** the Account Management system to be implemented first (see [account-management.md](account-management.md)). Key prerequisites:
+This feature **requires** the Account Management system (see [account-management.md](account-management.md)):
 
-- `account` table with `account_category='retirement'`
+- `accounts` table with `account_type='retirement'`
+- `retirement_type` field for subtypes (traditional_401k, roth_401k, etc.)
 - `account_balance_history` table for balance snapshots
-- Account creation and balance update UI
+- Balance update UI on account detail page
 
-## Current State (Post-Account Management)
+## What Account Management Provides
 
-What will exist after Account Management is implemented:
-- Users can create retirement accounts (401k, IRA, Roth IRA, etc.)
-- `account_balance_history` table tracks balance updates
-- `/accounts/<id>` page shows balance history
-- `/reports/retirement` route (partially implemented)
+After Account Management is implemented:
+- Users can create retirement accounts with proper subtypes
+- Balance snapshots are tracked in `account_balance_history`
+- `/accounts/<id>` page shows balance history with edit/delete
+- Balance calculation uses latest snapshot
 
-What this enhancement adds:
-- Contribution tracking (separate from market gains)
-- Employer match tracking
-- Contribution limit warnings (IRS limits)
-- Retirement goal projections
-- Asset allocation visualization
-- Enhanced retirement report page
+## What This Enhancement Adds
 
-## Proposed Solution
+- **Contribution tracking** - Separate from balance changes
+- **Employer match tracking** - Track company contributions
+- **IRS limit warnings** - Alert when approaching limits
+- **Retirement goals** - Target amounts and projections
+- **Enhanced reporting** - Contribution vs growth analysis
 
-### Database Schema Changes
+## Database Schema
 
-#### New Table: `retirement_contribution`
+### New Table: `retirement_contribution`
 
 Track contributions separately from balance updates:
 
-```sql
-CREATE TABLE retirement_contribution (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    account_id INT NOT NULL,                             -- FK to account (must be category='retirement')
-    contribution_date DATE NOT NULL,
-    employee_contribution DECIMAL(15, 2) DEFAULT 0.00,   -- Employee contribution
-    employer_match DECIMAL(15, 2) DEFAULT 0.00,          -- Employer match
-    contribution_type ENUM('regular', 'catchup', 'rollover') DEFAULT 'regular',
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (account_id) REFERENCES account(id) ON DELETE CASCADE,
-    INDEX idx_account_date (account_id, contribution_date)
-);
+```python
+class RetirementContribution(db.Model):
+    __tablename__ = 'retirement_contributions'
+
+    id = db.Column(db.Integer, primary_key=True)
+    account_id = db.Column(db.Integer, db.ForeignKey('accounts.id'), nullable=False)
+    contribution_date = db.Column(db.Date, nullable=False)
+    employee_amount = db.Column(db.Numeric(15, 2), default=0)
+    employer_match = db.Column(db.Numeric(15, 2), default=0)
+    contribution_type = db.Column(
+        db.Enum('regular', 'catchup', 'rollover'),
+        default='regular'
+    )
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    account = db.relationship('Account', backref='contributions')
+
+    __table_args__ = (
+        db.Index('idx_contribution_account_date', 'account_id', 'contribution_date'),
+    )
 ```
 
-#### New Table: `retirement_goal`
+### New Table: `retirement_goal`
 
 Track retirement savings goals:
 
-```sql
-CREATE TABLE retirement_goal (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    family_id INT NOT NULL,
-    target_amount DECIMAL(15, 2) NOT NULL,               -- Goal amount
-    target_date DATE NOT NULL,                           -- Target retirement date
-    monthly_contribution_goal DECIMAL(15, 2),            -- Suggested monthly contribution
-    expected_return_rate DECIMAL(5, 2),                  -- Expected annual return (%)
-    notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (family_id) REFERENCES family(id) ON DELETE CASCADE
-);
+```python
+class RetirementGoal(db.Model):
+    __tablename__ = 'retirement_goals'
+
+    id = db.Column(db.Integer, primary_key=True)
+    family_id = db.Column(db.Integer, db.ForeignKey('family.id'), nullable=False)
+    name = db.Column(db.String(128), nullable=False)  # e.g., "Retirement at 65"
+    target_amount = db.Column(db.Numeric(15, 2), nullable=False)
+    target_date = db.Column(db.Date, nullable=False)
+    monthly_contribution_target = db.Column(db.Numeric(15, 2), nullable=True)
+    expected_return_rate = db.Column(db.Numeric(5, 2), default=7.0)  # Annual %
+    notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    family = db.relationship('Family', backref='retirement_goals')
 ```
 
-**Note:** The `account_balance_history` table from Account Management is used for balance tracking, not a separate `retirement_balance` table.
+## IRS Contribution Limits (2025)
 
-### User Interface
-
-#### New Page: `/retirement/accounts`
-
-List of retirement accounts with current balances:
-
-```
-Retirement Accounts
--------------------
-[+ Add Account]
-
-401(k) - Employer Plan          $45,230.50  ↑ 12.3%
-Traditional IRA - Vanguard      $23,100.00  ↑ 8.5%
-Roth IRA - Fidelity            $15,600.00  ↑ 15.2%
--------------------------------------------
-Total Retirement Savings:       $83,930.50
-```
-
-#### Balance Update Form
-
-```
-Update Balance
---------------
-Account: [401(k) - Employer Plan ▼]
-Balance: [$_________]
-As of Date: [YYYY-MM-DD]
-Notes: [Optional notes]
-
-[Save Balance]
-```
-
-#### Enhanced Retirement Report
-
-Expand `/reports/retirement` to show:
-- Current balances
-- Balance history chart
-- Contribution tracking
-- Year-over-year growth
-- Projected retirement value (optional future enhancement)
-
-### API Endpoints
+Track and warn about limits:
 
 ```python
-# List retirement accounts
-GET /api/retirement/accounts
-
-# Add/update balance
-POST /api/retirement/balance
-{
-    "account_id": 1,
-    "balance": 45230.50,
-    "as_of_date": "2025-12-20"
+IRS_LIMITS_2025 = {
+    'traditional_401k': {'regular': 23500, 'catchup': 7500},  # 50+ catchup
+    'roth_401k': {'regular': 23500, 'catchup': 7500},
+    'traditional_ira': {'regular': 7000, 'catchup': 1000},
+    'roth_ira': {'regular': 7000, 'catchup': 1000},
+    'sep_ira': {'regular': 69000, 'catchup': 0},
+    '403b': {'regular': 23500, 'catchup': 7500},
 }
 
-# Get balance history
-GET /api/retirement/balance/<account_id>?start_date=2024-01-01&end_date=2025-12-20
+def get_year_contributions(account, year):
+    """Get total contributions for a year."""
+    return db.session.query(
+        func.sum(RetirementContribution.employee_amount)
+    ).filter(
+        RetirementContribution.account_id == account.id,
+        extract('year', RetirementContribution.contribution_date) == year
+    ).scalar() or 0
 
-# Delete balance entry
-DELETE /api/retirement/balance/<id>
+def check_contribution_limit(account, new_amount, year=None):
+    """Check if contribution would exceed IRS limits."""
+    year = year or datetime.now().year
+    current = get_year_contributions(account, year)
+    limit = IRS_LIMITS_2025.get(account.retirement_type, {}).get('regular', 0)
+
+    remaining = limit - current
+    if new_amount > remaining:
+        return {
+            'exceeded': True,
+            'limit': limit,
+            'current': current,
+            'remaining': remaining,
+            'overage': new_amount - remaining
+        }
+    return {'exceeded': False, 'remaining': remaining - new_amount}
+```
+
+## UI Changes
+
+### Contribution Entry Form
+
+Add to account detail page for retirement accounts:
+
+```
+Add Contribution
+----------------
+Date: [2025-12-15]
+Your Contribution: [$500.00]
+Employer Match: [$250.00]
+Type: [Regular ▼]  (Regular, Catch-up, Rollover)
+Notes: [Optional]
+
+Year-to-Date: $18,500 of $23,500 limit (78%)
+[████████████████████░░░░░]
+
+[Save Contribution]
+```
+
+### Contribution History
+
+Show on account detail page:
+
+```
+Contribution History
+--------------------
+Date         You        Employer   Type      Total
+2025-12-01   $500.00    $250.00    Regular   $750.00
+2025-11-01   $500.00    $250.00    Regular   $750.00
+2025-10-01   $500.00    $250.00    Regular   $750.00
+...
+
+YTD Total: $6,000.00 + $3,000.00 match = $9,000.00
+```
+
+### Retirement Goals Page (`/retirement/goals`)
+
+```
+Retirement Goals
+----------------
+[+ Add Goal]
+
+Goal: Retirement at 65
+Target: $1,000,000 by 2045
+Current Total: $83,930.50
+Progress: [████████░░░░░░░░░░░░] 8.4%
+Monthly Target: $1,200/month to reach goal
+
+[Edit] [Delete]
+```
+
+### Enhanced Retirement Report
+
+Expand `/reports/retirement`:
+
+```
+Retirement Summary
+==================
+
+Total Retirement Savings: $83,930.50
+
+By Account:
+- 401(k) - Employer Plan     $45,230.50  (54%)
+- Traditional IRA            $23,100.00  (28%)
+- Roth IRA                   $15,600.00  (18%)
+
+2025 Contributions:
+- Your Contributions:    $12,000.00
+- Employer Matches:       $6,000.00
+- Total:                 $18,000.00
+
+Growth Analysis:
+- Starting Balance (Jan 1):  $72,000.00
+- Contributions:             $18,000.00
+- Market Gains/Losses:       -$6,069.50
+- Ending Balance:            $83,930.50
+- Return Rate:               -7.2%
+
+[Chart: Balance Over Time]
+[Chart: Contributions vs Growth]
 ```
 
 ## Implementation Plan
 
-**Note:** This implementation assumes Account Management is complete.
-
 ### Phase 1: Contribution Tracking
-- [ ] Create `retirement_contribution` table migration
+- [ ] Create migration for `retirement_contributions` table
 - [ ] Create `RetirementContribution` model
-- [ ] Add contribution CRUD operations
-- [ ] Create contribution entry form
-- [ ] Link contributions to transactions (optional)
-- [ ] Add model and service tests
+- [ ] Add contribution service with IRS limit checking
+- [ ] Add contribution form to account detail page
+- [ ] Display contribution history
+- [ ] Add YTD contribution summary
 
 ### Phase 2: Retirement Goals
-- [ ] Create `retirement_goal` table migration
+- [ ] Create migration for `retirement_goals` table
 - [ ] Create `RetirementGoal` model
-- [ ] Add goal management UI
+- [ ] Add goal CRUD routes
+- [ ] Create goals management page
 - [ ] Implement projection calculator
-- [ ] Add progress tracking
-- [ ] Add goal tests
+- [ ] Display progress on dashboard
 
 ### Phase 3: Enhanced Reporting
 - [ ] Expand `/reports/retirement` page
-- [ ] Add contribution vs balance growth chart
-- [ ] Implement asset allocation tracking (future)
-- [ ] Add year-to-date contribution summary
-- [ ] IRS contribution limit warnings
+- [ ] Add contribution vs growth calculation
+- [ ] Add balance over time chart
+- [ ] Add contribution summary by year
+- [ ] Add account allocation pie chart
 
-### Phase 4: Testing & Polish
-- [ ] Integration tests for contribution tracking
-- [ ] Goal projection accuracy tests
-- [ ] UI/UX refinements
-- [ ] Documentation updates
-- [ ] Performance optimization
+### Phase 4: Testing
+- [ ] Model tests for contributions
+- [ ] Model tests for goals
+- [ ] IRS limit calculation tests
+- [ ] Route tests for contribution CRUD
+- [ ] Route tests for goal CRUD
+- [ ] Projection calculator tests
+
+## API Endpoints
+
+```python
+# Contributions
+POST   /accounts/<id>/contributions      # Add contribution
+GET    /accounts/<id>/contributions      # List contributions
+PUT    /contributions/<id>               # Update contribution
+DELETE /contributions/<id>               # Delete contribution
+
+# Goals
+GET    /retirement/goals                 # List goals
+POST   /retirement/goals                 # Create goal
+GET    /retirement/goals/<id>            # Get goal details
+PUT    /retirement/goals/<id>            # Update goal
+DELETE /retirement/goals/<id>            # Delete goal
+
+# Reports
+GET    /reports/retirement               # Retirement report
+GET    /api/retirement/summary           # JSON summary for charts
+```
+
+## Security & Privacy
+
+- All queries scoped by `family_id`
+- Contribution data is sensitive financial information
+- Goals are family-scoped (shared between family members)
+- Audit logging for contribution changes
+
+## Future Enhancements
+
+- Tax bracket optimization suggestions
+- Roth conversion analysis
+- Required Minimum Distribution (RMD) calculator
+- Social Security integration
+- Monte Carlo retirement projections
+- Asset allocation recommendations
+
+---
 
 ## Dependencies
 
 - **Depends On:** [account-management.md](account-management.md) - MUST be implemented first
 - **Required By:** None (optional enhancement)
-- **Related To:** [asset-management.md](asset-management.md) - Net worth calculation
-
-## Alternatives Considered
-
-### Option 1: Separate Retirement Balance Table
-**Approach:** Create `retirement_balance` table separate from `account_balance_history`
-**Pros:** Retirement-specific schema
-**Cons:** Duplication, Account Management already provides this
-**Decision:** Rejected - use `account_balance_history` from Account Management
-
-### Option 2: External Service Integration
-**Approach:** Integrate with Plaid or similar for automatic balance updates
-**Pros:** Automated, always current
-**Cons:** External dependency, privacy concerns, cost, complexity
-**Decision:** Deferred - manual entry for v1, consider for future enhancement
-
-### Option 3: Full Investment Tracking
-**Approach:** Track individual holdings, shares, cost basis
-**Pros:** Complete portfolio management
-**Cons:** Significant complexity, scope creep
-**Decision:** Out of scope - focus on balance and contribution tracking first
+- **Related To:** Asset tracking (same balance history pattern)
 
 ## Open Questions
 
-1. **Should we track asset allocation?**
-   - e.g., 60% stocks, 30% bonds, 10% cash
-   - Answer: Nice to have, but defer to v2
+1. **Should contributions link to transactions?**
+   - If user imports paycheck, link contribution to that transaction?
+   - Answer: Nice to have, defer to v2
 
-2. **How to handle employer matching?**
-   - Track separately or combined with contributions?
-   - Answer: Combined for simplicity, can separate in reports
+2. **Multiple goals per family?**
+   - Different retirement dates for spouses?
+   - Answer: Yes, support multiple goals
 
-3. **Support for non-retirement investment accounts?**
-   - Brokerage accounts, crypto, etc.
-   - Answer: Yes, but use same infrastructure (rename to "Investment Accounts"?)
-
-4. **Historical data import?**
-   - Allow bulk import of past balances?
-   - Answer: Yes, provide CSV import for balance history
-
-5. **Integration with existing transactions?**
-   - Link contribution transactions to balance updates?
-   - Answer: Optional - show related transactions in balance details
-
-## Security & Privacy Considerations
-
-- Balance data is sensitive - ensure family-scoped access control
-- No automatic external connections (user privacy)
-- Audit log for balance changes
-- Secure storage of balance history
-
-## Performance Considerations
-
-- Index on `(account_id, as_of_date)` for fast balance lookups
-- Limit chart data points for performance (monthly snapshots for >1 year views)
-- Cache current balances
-
-## Testing Strategy
-
-- Unit tests for models and services
-- Integration tests for API endpoints
-- UI tests for critical user flows
-- Test data generation for various scenarios
-- Performance tests for large balance histories
-
-## Documentation Updates Needed
-
-- User guide: "Managing Retirement Accounts"
-- Admin guide: "Retirement Account Configuration"
-- API documentation
-- Changelog entry
-
-## Future Enhancements
-
-- Retirement goal tracking and projections
-- Asset allocation visualization
-- Contribution limit tracking (IRS limits)
-- Tax-advantaged account reporting
-- Integration with tax software export
-
----
-
-## Feedback & Discussion
-
-Please provide feedback on this design by commenting on the related GitHub issue or pull request.
-
-**Questions to consider:**
-- Is the scope appropriate for v1?
-- Are there critical features missing?
-- Should we prioritize differently?
-- Any technical concerns with the proposed approach?
+3. **Historical IRS limits?**
+   - Track limits by year for accurate historical analysis?
+   - Answer: Store limits in config, update annually

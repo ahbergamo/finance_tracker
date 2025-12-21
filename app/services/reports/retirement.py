@@ -6,17 +6,14 @@ from app import db
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.models.category import Category
-from app.models.account_type import AccountType
+from app.models.account import Account
 
 
 def get_retirement_accounts(family_id):
-    """Get all retirement account types for a family."""
-    retirement_account_names = [
-        '401k Account', 'Traditional IRA', 'Roth IRA', '403b Account'
-    ]
-    return AccountType.query.filter(
-        AccountType.family_id == family_id,
-        AccountType.name.in_(retirement_account_names)
+    """Get all retirement accounts for a family."""
+    return Account.query.filter(
+        Account.family_id == family_id,
+        Account.account_type == 'retirement'
     ).all()
 
 

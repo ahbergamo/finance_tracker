@@ -5,7 +5,7 @@ from dateutil import parser
 from flask import render_template, redirect, url_for, flash, current_app, session
 from app.models.transaction import Transaction
 from app.models.category import Category
-from app.models.account_type import AccountType
+from app.models.account import Account
 from app.models.import_rule import ImportRule
 from app import db
 from app.services.transactions.utilities import get_family_user_ids, create_or_get_category
@@ -18,17 +18,17 @@ PER_BATCH = 10
 
 def get_account_type(account_id, current_user):
     """
-    Retrieve the account type object for a given account ID and current user.
+    Retrieve the account object for a given account ID and current user.
 
     Args:
         account_id (int): The ID of the account.
         current_user (User): The current logged-in user.
 
     Returns:
-        AccountType: The account type object if found, otherwise None.
+        Account: The account object if found, otherwise None.
     """
     try:
-        acc_type_obj = AccountType.query.filter_by(id=account_id, family_id=current_user.family_id).first()
+        acc_type_obj = Account.query.filter_by(id=account_id, family_id=current_user.family_id).first()
         if not acc_type_obj:
             flash(f"Invalid account selected (ID: {account_id}). Please try again.", "danger")
             current_app.logger.error("Invalid account selected: %s", account_id)
@@ -72,7 +72,7 @@ def parse_csv(file, acc_type_obj, delimiter=","):
 
     Args:
         file (FileStorage): The uploaded CSV file.
-        acc_type_obj (AccountType): The account type object.
+        acc_type_obj (Account): The account object.
         delimiter (str): The delimiter used in the CSV file.
 
     Returns:
@@ -100,7 +100,7 @@ def parse_csv_row(row, acc_type_obj):
 
     Args:
         row (dict): A dictionary representing a row from the CSV file.
-        acc_type_obj (AccountType): The account type object.
+        acc_type_obj (Account): The account object.
 
     Returns:
         tuple: A tuple containing transaction details or None if parsing fails.
@@ -136,7 +136,7 @@ def apply_import_rules(transactions_data, acc_type_obj):
 
     Args:
         transactions_data (list): A list of parsed transaction data.
-        acc_type_obj (AccountType): The account type object.
+        acc_type_obj (Account): The account object.
 
     Returns:
         list: A list of processed transaction data with applied rules.
@@ -463,8 +463,8 @@ def render_import_page_service(current_user):
     Returns:
         Response: A rendered template for the import transactions page.
     """
-    account_types = AccountType.query.filter_by(family_id=current_user.family_id).all()
-    return render_template("transactions/import_transactions.html", accounts=account_types)
+    accounts = Account.query.filter_by(family_id=current_user.family_id).all()
+    return render_template("transactions/import_transactions.html", accounts=accounts)
 
 
 def prepare_import_preview(all_processed_data, current_user):

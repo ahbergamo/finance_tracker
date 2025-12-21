@@ -106,7 +106,7 @@ def test_process_transaction_results(app):
 
 
 @patch("app.services.reports.income_expense.Category.query", new_callable=MagicMock)
-@patch("app.services.reports.income_expense.AccountType.query", new_callable=MagicMock)
+@patch("app.services.reports.income_expense.Account.query", new_callable=MagicMock)
 def test_get_cached_categories_and_accounts(mock_account_query, mock_category_query, app):
     """
     The added 'app' parameter ensures an active application context.

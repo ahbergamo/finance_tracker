@@ -3,7 +3,7 @@
 from app import db
 from app.models.user import User
 from app.models.family import Family
-from app.models.account_type import AccountType
+from app.models.account import Account
 from app.models.import_rule import ImportRule
 from app.models.category import Category
 from app.utils.load_defaults import ensure_default_account_types
@@ -41,43 +41,47 @@ def seed_db_for_tests():
     db.session.add(user2)
     db.session.commit()
 
-    # Seed account types
+    # Seed accounts
     account_types1 = [
-        AccountType(
+        Account(
             name="Chase Prime Credit",
             category_field="Category",
             date_field="Transaction Date",
             amount_field="Amount",
             description_field="Description",
             family_id=family1.id,
-            positive_expense=False
+            positive_expense=False,
+            account_type='credit_card'
         ),
-        AccountType(
+        Account(
             name="Chase Checking",
             category_field="Type",
             date_field="Posting Date",
             amount_field="Amount",
             description_field="Description",
             family_id=family1.id,
-            positive_expense=False
+            positive_expense=False,
+            account_type='checking'
         ),
-        AccountType(
+        Account(
             name="Chase Savings",
             category_field="Type",
             date_field="Posting Date",
             amount_field="Amount",
             description_field="Description",
             family_id=family1.id,
-            positive_expense=False
+            positive_expense=False,
+            account_type='savings'
         ),
-        AccountType(
+        Account(
             name="Discover Credit",
             category_field="Category",
             date_field="Trans. Date",
             amount_field="Amount",
             description_field="Description",
             family_id=family1.id,
-            positive_expense=True
+            positive_expense=True,
+            account_type='credit_card'
         ),
     ]
     db.session.bulk_save_objects(account_types1)
@@ -127,34 +131,37 @@ def seed_db_for_tests():
     db.session.add(user3)
     db.session.commit()
 
-    # Example account types for family2
+    # Example accounts for family2
     account_types2 = [
-        AccountType(
+        Account(
             name="US Bank Checking",
             category_field="Transaction",
             date_field="Date",
             amount_field="Amount",
             description_field="Name",
             family_id=family2.id,
-            positive_expense=False
+            positive_expense=False,
+            account_type='checking'
         ),
-        AccountType(
+        Account(
             name="US Bank Savings",
             category_field="Type",
             date_field="Posting Date",
             amount_field="Amount",
             description_field="Description",
             family_id=family2.id,
-            positive_expense=False
+            positive_expense=False,
+            account_type='savings'
         ),
-        AccountType(
+        Account(
             name="Discover Credit",
             category_field="Category",
             date_field="Trans. Date",
             amount_field="Amount",
             description_field="Description",
             family_id=family2.id,
-            positive_expense=True
+            positive_expense=True,
+            account_type='credit_card'
         )
     ]
     db.session.bulk_save_objects(account_types2)

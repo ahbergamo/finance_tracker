@@ -3,7 +3,7 @@ from flask_login import current_user
 from app import db
 from app.models.transaction import Transaction
 from app.models.category import Category
-from app.models.account_type import AccountType
+from app.models.account import Account
 from app.services.transactions.utilities import create_or_get_category
 
 
@@ -61,7 +61,7 @@ def render_add_transaction_form():
     current_app.logger.debug("Rendering add transaction form for user %s", current_user.id)
     try:
         categories = Category.query.filter_by(family_id=current_user.family_id).all()
-        account_types = AccountType.query.filter_by(family_id=current_user.family_id).all()
+        account_types = Account.query.filter_by(family_id=current_user.family_id).all()
         current_app.logger.debug("Retrieved %d categories and %d account types for family_id %s",
                                  len(categories), len(account_types), current_user.family_id)
     except Exception as e:

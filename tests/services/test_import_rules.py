@@ -3,7 +3,7 @@ from app import db
 from app.models.user import User
 from app.models.import_rule import ImportRule
 from app.models.category import Category
-from app.models.account_type import AccountType
+from app.models.account import Account
 from app.services.import_rules import (
     fetch_account_types_and_categories,
     process_override_category,
@@ -134,14 +134,14 @@ def test_delete_import_rule(app, family_user, request_context):
 def test_apply_rule_to_transactions(app, family_user, request_context):
     """
     Test applying a rule to relevant transactions. Provide non-null
-    category_id, amount, account_id referencing a real AccountType row.
+    category_id, amount, account_id referencing a real Account row.
     """
     from app.models.transaction import Transaction
 
     with app.app_context():
-        # 1) Find a seeded AccountType row for the same family (e.g., "Chase Checking").
-        seeded_acct_type = AccountType.query.filter_by(name="Chase Checking", family_id=family_user.family_id).first()
-        assert seeded_acct_type, "No seeded 'Chase Checking' AccountType found for user's family."
+        # 1) Find a seeded Account row for the same family (e.g., "Chase Checking").
+        seeded_acct = Account.query.filter_by(name="Chase Checking", family_id=family_user.family_id).first()
+        assert seeded_acct, "No seeded 'Chase Checking' Account found for user's family."
 
         # 2) Create a new category
         cat = Category(name="TempCat", family_id=family_user.family_id)
@@ -165,7 +165,7 @@ def test_apply_rule_to_transactions(app, family_user, request_context):
             description="PLEASE MATCHME",
             amount=100.0,
             category_id=cat.id,
-            account_id=seeded_acct_type.id,  # references the account_types table
+            account_id=seeded_acct.id,  # references the accounts table
             is_transfer=False
         )
         db.session.add(tx)
@@ -184,9 +184,9 @@ def test_get_transaction_field_value(app, family_user, request_context):
     from app.models.transaction import Transaction
 
     with app.app_context():
-        # 1) Find a seeded AccountType row for the same family
-        seeded_acct_type = AccountType.query.filter_by(name="Chase Checking", family_id=family_user.family_id).first()
-        assert seeded_acct_type, "No seeded 'Chase Checking' AccountType found for user's family."
+        # 1) Find a seeded Account row for the same family
+        seeded_acct = Account.query.filter_by(name="Chase Checking", family_id=family_user.family_id).first()
+        assert seeded_acct, "No seeded 'Chase Checking' Account found for user's family."
 
         cat = Category(name="AnyCat", family_id=family_user.family_id)
         db.session.add(cat)
@@ -197,7 +197,7 @@ def test_get_transaction_field_value(app, family_user, request_context):
             description="Test Description",
             amount=200.0,
             category_id=cat.id,
-            account_id=seeded_acct_type.id,
+            account_id=seeded_acct.id,
             is_transfer=False
         )
         db.session.add(tx)

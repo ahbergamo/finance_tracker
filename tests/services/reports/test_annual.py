@@ -79,7 +79,7 @@ def test_build_query(mock_query, app):
 
 
 @patch("app.services.reports.annual.Category.query", new_callable=MagicMock)
-@patch("app.services.reports.annual.AccountType.query", new_callable=MagicMock)
+@patch("app.services.reports.annual.Account.query", new_callable=MagicMock)
 def test_get_dropdown_options(mock_account_query, mock_category_query, app):
     """
     The added 'app' parameter (from your conftest.py) ensures an active application context.

@@ -5,7 +5,7 @@ from app import db
 from app.models.transaction import Transaction
 from app.models.user import User
 from app.models.category import Category
-from app.models.account_type import AccountType
+from app.models.account import Account
 
 
 def parse_filters(request_args) -> dict:
@@ -105,7 +105,7 @@ def get_dropdown_options(current_user: User) -> tuple:
             filter_value = current_user.id
 
         categories = Category.query.filter_by(**{filter_field: filter_value}).all()
-        accounts = AccountType.query.filter_by(**{filter_field: filter_value}).all()
+        accounts = Account.query.filter_by(**{filter_field: filter_value}).all()
         current_app.logger.debug("Retrieved %d categories and %d accounts for %s=%s",
                                  len(categories), len(accounts), filter_field, filter_value)
         return categories, accounts

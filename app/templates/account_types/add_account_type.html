@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Add Account Type</h1>
+<h1>Add Account</h1>
 <div class="mb-3">
-  <label for="predefined-select" class="form-label">Pre-defined Account Type</label>
+  <label for="predefined-select" class="form-label">Pre-defined Account</label>
   <select id="predefined-select" class="form-select form-select-sm">
-    <option value="">-- Select a pre-defined account type --</option>
+    <option value="">-- Select a pre-defined account --</option>
     {% for pre in pre_defined_accounts %}
     <option value="{{ pre.id }}" data-name="{{ pre.name }}" data-category="{{ pre.category_field }}"
       data-date="{{ pre.date_field }}" data-amount="{{ pre.amount_field }}"
@@ -16,36 +16,74 @@
 </div>
 <form method="POST">
   {{ form.hidden_tag() }}
+
   <div class="mb-3">
     {{ form.name.label(class="form-label") }}
     {{ form.name(class="form-control form-control-sm") }}
   </div>
-  <div class="mb-3">
-    {{ form.category_field.label(class="form-label") }}
-    {{ form.category_field(class="form-control form-control-sm") }}
+
+  <div class="row mb-3">
+    <div class="col-md-4">
+      {{ form.account_type.label(class="form-label") }}
+      {{ form.account_type(class="form-select form-select-sm", id="account-type-select") }}
+    </div>
+    <div class="col-md-4" id="retirement-type-container" style="display: none;">
+      {{ form.retirement_type.label(class="form-label") }}
+      {{ form.retirement_type(class="form-select form-select-sm") }}
+    </div>
+    <div class="col-md-4">
+      {{ form.initial_balance.label(class="form-label") }}
+      <div class="input-group input-group-sm">
+        <span class="input-group-text">$</span>
+        {{ form.initial_balance(class="form-control form-control-sm", step="0.01") }}
+      </div>
+    </div>
   </div>
-  <div class="mb-3">
-    {{ form.date_field.label(class="form-label") }}
-    {{ form.date_field(class="form-control form-control-sm") }}
+
+  <div id="csv-fields">
+    <h5 class="mt-4 mb-3">CSV Import Settings</h5>
+    <p class="text-muted small">Configure how to parse CSV files for this account. Optional for retirement/brokerage accounts.</p>
+
+    <div class="mb-3">
+      {{ form.category_field.label(class="form-label") }}
+      {{ form.category_field(class="form-control form-control-sm") }}
+    </div>
+    <div class="mb-3">
+      {{ form.date_field.label(class="form-label") }}
+      {{ form.date_field(class="form-control form-control-sm") }}
+    </div>
+    <div class="mb-3">
+      {{ form.amount_field.label(class="form-label") }}
+      {{ form.amount_field(class="form-control form-control-sm") }}
+    </div>
+    <div class="mb-3">
+      {{ form.description_field.label(class="form-label") }}
+      {{ form.description_field(class="form-control form-control-sm") }}
+    </div>
+    <div class="form-check mb-3">
+      {{ form.positive_expense(class="form-check-input") }}
+      {{ form.positive_expense.label(class="form-check-label") }}
+    </div>
   </div>
-  <div class="mb-3">
-    {{ form.amount_field.label(class="form-label") }}
-    {{ form.amount_field(class="form-control form-control-sm") }}
-  </div>
-  <div class="mb-3">
-    {{ form.description_field.label(class="form-label") }}
-    {{ form.description_field(class="form-control form-control-sm") }}
-  </div>
-  <div class="form-check mb-3">
-    {{ form.positive_expense(class="form-check-input") }}
-    {{ form.positive_expense.label(class="form-check-label") }}
-  </div>
+
   <div>
     {{ form.submit(class="btn btn-primary") }}
     <a href="{{ url_for('account_types.index') }}" class="btn btn-secondary">Cancel</a>
   </div>
 </form>
+
 <script>
+  // Show/hide retirement type based on account type selection
+  document.getElementById('account-type-select').addEventListener('change', function() {
+    var retirementContainer = document.getElementById('retirement-type-container');
+    if (this.value === 'retirement') {
+      retirementContainer.style.display = 'block';
+    } else {
+      retirementContainer.style.display = 'none';
+    }
+  });
+
+  // Pre-defined account selection
   document.getElementById('predefined-select').addEventListener('change', function () {
     var selectedOption = this.options[this.selectedIndex];
     if (selectedOption.value) {

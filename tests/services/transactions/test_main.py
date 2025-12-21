@@ -45,7 +45,7 @@ class DummyQuery:
         return self.deleted_count
 
 
-# --- Dummy Models for Category and AccountType ---
+# --- Dummy Models for Category and Account ---
 class DummyCategoryModel:
     pass
 
@@ -54,12 +54,12 @@ DummyCategoryModel.query = MagicMock()
 DummyCategoryModel.query.filter_by.return_value.order_by.return_value.all.return_value = ["Cat1", "Cat2"]
 
 
-class DummyAccountTypeModel:
+class DummyAccountModel:
     pass
 
 
-DummyAccountTypeModel.query = MagicMock()
-DummyAccountTypeModel.query.filter_by.return_value.order_by.return_value.all.return_value = ["Acc1", "Acc2"]
+DummyAccountModel.query = MagicMock()
+DummyAccountModel.query.filter_by.return_value.order_by.return_value.all.return_value = ["Acc1", "Acc2"]
 
 
 # Dummy get_family_user_ids function.
@@ -108,7 +108,7 @@ class TestMainService(unittest.TestCase):
 
     @patch("app.services.transactions.main.get_family_user_ids", side_effect=dummy_get_family_user_ids)
     @patch("app.services.transactions.main.Category", new=DummyCategoryModel)
-    @patch("app.services.transactions.main.AccountType", new=DummyAccountTypeModel)
+    @patch("app.services.transactions.main.Account", new=DummyAccountModel)
     @patch("app.services.transactions.main.calculate_summary", return_value="dummy_summary")
     @patch("app.services.transactions.main.apply_filters", side_effect=lambda q, cid, cids, aid: q)
     @patch("app.services.transactions.main.apply_time_filter", side_effect=lambda q, tf: (q, "dummy_range"))
@@ -140,7 +140,7 @@ class TestMainService(unittest.TestCase):
     @patch("app.services.transactions.main.handle_duplicates", return_value=({}, "dup_summary"))
     @patch("app.services.transactions.main.get_family_user_ids", side_effect=dummy_get_family_user_ids)
     @patch("app.services.transactions.main.Category", new=DummyCategoryModel)
-    @patch("app.services.transactions.main.AccountType", new=DummyAccountTypeModel)
+    @patch("app.services.transactions.main.Account", new=DummyAccountModel)
     def test_process_transactions_view_duplicates(self, mock_get_family, mock_handle_duplicates):
         with self.app.test_request_context("/transactions/main?page=1"):
             filter_type = "duplicates"
