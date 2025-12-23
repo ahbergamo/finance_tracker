@@ -6,7 +6,7 @@ from calendar import monthrange
 from app import db
 from app.models.transaction import Transaction
 from app.models.category import Category
-from app.models.account import Account
+from app.models.account import Account, TRANSACTION_ACCOUNT_TYPES
 from app.services.transactions.utilities import get_family_user_ids
 
 
@@ -129,7 +129,10 @@ def process_transactions_view(filter_type, time_filter, category_id, category_id
     if filter_type == "duplicates":
         current_app.logger.debug("Processing duplicates view")
         grouped_duplicates, summary = handle_duplicates(query, family_user_ids, category_id, category_ids, account_id)
-        account_types = Account.query.filter_by(family_id=current_user.family_id).all()
+        # Only show transaction-based accounts (not retirement, brokerage, etc.)
+        account_types = Account.query.filter_by(family_id=current_user.family_id).filter(
+            Account.account_type.in_(TRANSACTION_ACCOUNT_TYPES)
+        ).all()
         current_app.logger.debug("Returning duplicates view with %d duplicate groups", len(grouped_duplicates))
         return {
             "grouped_duplicates": grouped_duplicates,
@@ -167,7 +170,10 @@ def process_transactions_view(filter_type, time_filter, category_id, category_id
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
         user_transactions = pagination.items
         summary = calculate_summary(query)
-        account_types = Account.query.filter_by(family_id=current_user.family_id).all()
+        # Only show transaction-based accounts (not retirement, brokerage, etc.)
+        account_types = Account.query.filter_by(family_id=current_user.family_id).filter(
+            Account.account_type.in_(TRANSACTION_ACCOUNT_TYPES)
+        ).all()
         current_app.logger.debug("Processed transactions view: %d transactions, date_range_display: %s", len(user_transactions), date_range_display)
         return {
             "transactions": user_transactions,

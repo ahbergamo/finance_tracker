@@ -76,24 +76,57 @@
           <h5>Current Account Balances</h5>
         </div>
         <div class="card-body">
-          {% if account_balances %}
+          {% if account_details %}
             <table class="table table-sm">
               <thead>
                 <tr>
                   <th>Account</th>
+                  <th>Type</th>
                   <th class="text-end">Balance</th>
                 </tr>
               </thead>
               <tbody>
-                {% for account_name, balance in account_balances.items() %}
+                {% for account in account_details %}
                 <tr>
-                  <td>{{ account_name }}</td>
-                  <td class="text-end {% if balance >= 0 %}text-success{% else %}text-danger{% endif %}">
-                    ${{ "{:,.2f}".format(balance) }}
+                  <td>
+                    {{ account.name }}
+                    {% if account.is_pension and account.pension_monthly_benefit %}
+                      <br><small class="text-muted">${{ "{:,.2f}".format(account.pension_monthly_benefit) }}/mo starting {{ account.pension_start_date.strftime('%b %Y') if account.pension_start_date else 'TBD' }}</small>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <small class="text-muted">
+                      {% if account.retirement_type == 'traditional_401k' %}Traditional 401(k)
+                      {% elif account.retirement_type == 'roth_401k' %}Roth 401(k)
+                      {% elif account.retirement_type == 'traditional_ira' %}Traditional IRA
+                      {% elif account.retirement_type == 'roth_ira' %}Roth IRA
+                      {% elif account.retirement_type == 'sep_ira' %}SEP IRA
+                      {% elif account.retirement_type == '403b' %}403(b)
+                      {% elif account.retirement_type == 'pension' %}Pension
+                      {% else %}Retirement
+                      {% endif %}
+                    </small>
+                    {% if account.is_pension %}
+                      <br><small class="text-info" data-bs-toggle="tooltip" title="Present value calculated using 4% discount rate and 20-year payout">(Est. PV)</small>
+                    {% endif %}
+                  </td>
+                  <td class="text-end {% if account.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    ${{ "{:,.2f}".format(account.balance) }}
                   </td>
                 </tr>
                 {% endfor %}
               </tbody>
+              <tfoot>
+                <tr class="table-light">
+                  <td colspan="2"><strong>Total</strong></td>
+                  <td class="text-end">
+                    {% set total = account_balances.values() | sum %}
+                    <strong class="{% if total >= 0 %}text-success{% else %}text-danger{% endif %}">
+                      ${{ "{:,.2f}".format(total) }}
+                    </strong>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           {% else %}
             <p class="text-muted">No retirement accounts found.</p>

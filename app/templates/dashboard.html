@@ -58,6 +58,14 @@
             <input type="checkbox" class="form-check-input dashboard-toggle" id="toggle-cashFlow" data-card="card-cashFlow" checked>
             <label class="form-check-label" for="toggle-cashFlow">Cash Flow Overview</label>
           </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input dashboard-toggle" id="toggle-netWorth" data-card="card-netWorth" checked>
+            <label class="form-check-label" for="toggle-netWorth">Net Worth Summary</label>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input dashboard-toggle" id="toggle-retirement" data-card="card-retirement" checked>
+            <label class="form-check-label" for="toggle-retirement">Retirement Accounts</label>
+          </div>
         </div>
         <div class="modal-footer">
           <button id="saveDashboardSettings" type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Changes</button>
@@ -341,6 +349,126 @@
           <canvas id="cashFlowChart"></canvas>
         </div>
       </div>
+    </div>
+    <div class="dashboard-card" id="card-netWorth">
+      <a href="{{ url_for('report.net_worth_report') }}" class="text-decoration-none text-reset">
+        <div class="card graph-box">
+          <div class="card-header">
+            <span class="drag-handle"><i class="fa-solid fa-arrows-alt"></i></span>
+            Net Worth Summary
+          </div>
+          <div class="card-body">
+            <div class="row text-center mb-3">
+              <div class="col-4">
+                <h6 class="text-muted mb-1">Assets</h6>
+                <h5 class="text-success mb-0">${{ "{:,.0f}".format(net_worth_data.total_assets) }}</h5>
+              </div>
+              <div class="col-4">
+                <h6 class="text-muted mb-1">Liabilities</h6>
+                <h5 class="text-danger mb-0">${{ "{:,.0f}".format(net_worth_data.total_liabilities) }}</h5>
+              </div>
+              <div class="col-4">
+                <h6 class="text-muted mb-1">Net Worth</h6>
+                <h5 class="{% if net_worth_data.net_worth >= 0 %}text-success{% else %}text-danger{% endif %} mb-0">
+                  ${{ "{:,.0f}".format(net_worth_data.net_worth) }}
+                </h5>
+              </div>
+            </div>
+            <hr>
+            <ul class="list-group list-group-flush">
+              {% if net_worth_data.summary.checking.total != 0 or net_worth_data.summary.checking.accounts %}
+              <li class="list-group-item d-flex justify-content-between py-1 px-0">
+                <span>Checking</span>
+                <span>${{ "{:,.0f}".format(net_worth_data.summary.checking.total) }}</span>
+              </li>
+              {% endif %}
+              {% if net_worth_data.summary.savings.total != 0 or net_worth_data.summary.savings.accounts %}
+              <li class="list-group-item d-flex justify-content-between py-1 px-0">
+                <span>Savings</span>
+                <span>${{ "{:,.0f}".format(net_worth_data.summary.savings.total) }}</span>
+              </li>
+              {% endif %}
+              {% if net_worth_data.summary.credit_card.total != 0 or net_worth_data.summary.credit_card.accounts %}
+              <li class="list-group-item d-flex justify-content-between py-1 px-0">
+                <span>Credit Cards</span>
+                <span class="{% if net_worth_data.summary.credit_card.total < 0 %}text-danger{% endif %}">
+                  ${{ "{:,.0f}".format(net_worth_data.summary.credit_card.total) }}
+                </span>
+              </li>
+              {% endif %}
+              {% if net_worth_data.summary.retirement.total != 0 or net_worth_data.summary.retirement.accounts %}
+              <li class="list-group-item d-flex justify-content-between py-1 px-0">
+                <span>Retirement</span>
+                <span class="text-success">${{ "{:,.0f}".format(net_worth_data.summary.retirement.total) }}</span>
+              </li>
+              {% endif %}
+              {% if net_worth_data.summary.brokerage.total != 0 or net_worth_data.summary.brokerage.accounts %}
+              <li class="list-group-item d-flex justify-content-between py-1 px-0">
+                <span>Brokerage</span>
+                <span class="text-success">${{ "{:,.0f}".format(net_worth_data.summary.brokerage.total) }}</span>
+              </li>
+              {% endif %}
+              {% if net_worth_data.summary.real_estate.total != 0 or net_worth_data.summary.real_estate.accounts %}
+              <li class="list-group-item d-flex justify-content-between py-1 px-0">
+                <span>Real Estate</span>
+                <span>${{ "{:,.0f}".format(net_worth_data.summary.real_estate.total) }}</span>
+              </li>
+              {% endif %}
+              {% if net_worth_data.summary.loan.total != 0 or net_worth_data.summary.loan.accounts %}
+              <li class="list-group-item d-flex justify-content-between py-1 px-0">
+                <span>Loans</span>
+                <span class="text-danger">${{ "{:,.0f}".format(net_worth_data.summary.loan.total) }}</span>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="dashboard-card" id="card-retirement">
+      <a href="{{ url_for('report.retirement_report') }}" class="text-decoration-none text-reset">
+        <div class="card graph-box">
+          <div class="card-header">
+            <span class="drag-handle"><i class="fa-solid fa-arrows-alt"></i></span>
+            Retirement Accounts
+          </div>
+          <div class="card-body">
+            {% if net_worth_data.summary.retirement.accounts %}
+              <div class="text-center mb-3">
+                <h6 class="text-muted mb-1">Total Retirement</h6>
+                <h4 class="text-success mb-0">${{ "{:,.0f}".format(net_worth_data.summary.retirement.total) }}</h4>
+              </div>
+              <ul class="list-group list-group-flush">
+                {% for account in net_worth_data.summary.retirement.accounts %}
+                <li class="list-group-item d-flex justify-content-between align-items-start py-2 px-0">
+                  <div>
+                    <strong>{{ account.name }}</strong>
+                    <br>
+                    <small class="text-muted">
+                      {% if account.retirement_type == 'traditional_401k' %}Traditional 401(k)
+                      {% elif account.retirement_type == 'roth_401k' %}Roth 401(k)
+                      {% elif account.retirement_type == 'traditional_ira' %}Traditional IRA
+                      {% elif account.retirement_type == 'roth_ira' %}Roth IRA
+                      {% elif account.retirement_type == 'sep_ira' %}SEP IRA
+                      {% elif account.retirement_type == '403b' %}403(b)
+                      {% elif account.retirement_type == 'pension' %}Pension
+                      {% else %}Retirement
+                      {% endif %}
+                    </small>
+                    {% if account.is_pension and account.pension_monthly_benefit %}
+                      <br><small class="text-info">${{ "{:,.2f}".format(account.pension_monthly_benefit) }}/mo @ {{ account.pension_start_date.strftime('%b %Y') if account.pension_start_date else 'TBD' }}</small>
+                    {% endif %}
+                  </div>
+                  <span class="badge bg-success">${{ "{:,.0f}".format(account.balance) }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted text-center mb-0">No retirement accounts found.</p>
+            {% endif %}
+          </div>
+        </div>
+      </a>
     </div>
   </div>
 </div>

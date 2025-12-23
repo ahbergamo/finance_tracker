@@ -70,6 +70,9 @@ def create_account_type(form):
     Create a new account in the database.
     """
     try:
+        retirement_type = form.retirement_type.data if form.account_type.data == 'retirement' else None
+        is_pension = (retirement_type == 'pension')
+
         account = Account(
             name=form.name.data,
             category_field=form.category_field.data,
@@ -78,8 +81,10 @@ def create_account_type(form):
             description_field=form.description_field.data,
             positive_expense=form.positive_expense.data,
             account_type=form.account_type.data,
-            retirement_type=form.retirement_type.data if form.account_type.data == 'retirement' else None,
+            retirement_type=retirement_type,
             initial_balance=form.initial_balance.data or 0,
+            pension_monthly_benefit=form.pension_monthly_benefit.data if is_pension else None,
+            pension_start_date=form.pension_start_date.data if is_pension else None,
             family_id=current_user.family_id
         )
         db.session.add(account)
@@ -127,6 +132,9 @@ def update_account_type(account_type, form):
     Update an existing account in the database.
     """
     try:
+        retirement_type = form.retirement_type.data if form.account_type.data == 'retirement' else None
+        is_pension = (retirement_type == 'pension')
+
         account_type.name = form.name.data
         account_type.category_field = form.category_field.data
         account_type.date_field = form.date_field.data
@@ -134,8 +142,10 @@ def update_account_type(account_type, form):
         account_type.description_field = form.description_field.data
         account_type.positive_expense = form.positive_expense.data
         account_type.account_type = form.account_type.data
-        account_type.retirement_type = form.retirement_type.data if form.account_type.data == 'retirement' else None
+        account_type.retirement_type = retirement_type
         account_type.initial_balance = form.initial_balance.data or 0
+        account_type.pension_monthly_benefit = form.pension_monthly_benefit.data if is_pension else None
+        account_type.pension_start_date = form.pension_start_date.data if is_pension else None
         db.session.commit()
         current_app.logger.info("Updated account: %s (ID: %d) for family_id %s", account_type.name, account_type.id, current_user.family_id)
         return True

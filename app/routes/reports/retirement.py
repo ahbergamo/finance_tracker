@@ -36,13 +36,14 @@ def retirement_report():
     # Get chart data for contributions over time
     labels, totals = get_retirement_chart_data(current_user, start_date, end_date)
 
-    # Get current account balances
-    account_balances = get_retirement_account_balances(current_user, end_date)
+    # Get current account balances (from balance history, not transactions)
+    account_balances, account_details = get_retirement_account_balances(current_user, end_date)
 
     return render_template(
         'reports/retirement.html',
         summary_data=summary_data,
         account_balances=account_balances,
+        account_details=account_details,
         labels=labels,
         totals=totals,
         date_range_display=date_range_display,

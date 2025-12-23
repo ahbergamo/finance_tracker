@@ -55,11 +55,14 @@ DummyCategoryModel.query.filter_by.return_value.order_by.return_value.all.return
 
 
 class DummyAccountModel:
-    pass
+    # Add account_type attribute for .in_() filter
+    account_type = MagicMock()
 
 
 DummyAccountModel.query = MagicMock()
 DummyAccountModel.query.filter_by.return_value.order_by.return_value.all.return_value = ["Acc1", "Acc2"]
+# Support chained .filter_by().filter().all() for transaction account type filtering
+DummyAccountModel.query.filter_by.return_value.filter.return_value.all.return_value = ["Acc1", "Acc2"]
 
 
 # Dummy get_family_user_ids function.

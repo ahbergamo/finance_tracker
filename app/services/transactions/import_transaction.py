@@ -5,7 +5,7 @@ from dateutil import parser
 from flask import render_template, redirect, url_for, flash, current_app, session
 from app.models.transaction import Transaction
 from app.models.category import Category
-from app.models.account import Account
+from app.models.account import Account, TRANSACTION_ACCOUNT_TYPES
 from app.models.import_rule import ImportRule
 from app import db
 from app.services.transactions.utilities import get_family_user_ids, create_or_get_category
@@ -463,7 +463,10 @@ def render_import_page_service(current_user):
     Returns:
         Response: A rendered template for the import transactions page.
     """
-    accounts = Account.query.filter_by(family_id=current_user.family_id).all()
+    # Only show transaction-based accounts (not retirement, brokerage, etc.)
+    accounts = Account.query.filter_by(family_id=current_user.family_id).filter(
+        Account.account_type.in_(TRANSACTION_ACCOUNT_TYPES)
+    ).all()
     return render_template("transactions/import_transactions.html", accounts=accounts)
 
 

@@ -58,6 +58,10 @@ def get_balance_history_balance(account, as_of_date=None):
 
 def get_account_balance(account, user_ids, as_of_date=None):
     """Get balance for any account type."""
+    # Pensions use present value calculation, not balance history
+    if account.is_pension():
+        return float(account.get_pension_present_value())
+
     if account.account_type in BALANCE_HISTORY_TYPES:
         return get_balance_history_balance(account, as_of_date)
     else:
@@ -95,7 +99,10 @@ def get_net_worth_summary(current_user):
             'id': account.id,
             'name': account.name,
             'balance': balance,
-            'retirement_type': account.retirement_type
+            'retirement_type': account.retirement_type,
+            'is_pension': account.is_pension(),
+            'pension_monthly_benefit': float(account.pension_monthly_benefit) if account.pension_monthly_benefit else None,
+            'pension_start_date': account.pension_start_date
         }
 
         if account_type in summary:

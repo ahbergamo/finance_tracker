@@ -7,6 +7,7 @@ from app.models.transaction import Transaction
 from app.models.user import User
 from app.models.category import Category
 from app.models.account import Account
+from app.models.account_balance_history import AccountBalanceHistory
 
 
 def get_retirement_accounts(family_id):
@@ -129,23 +130,45 @@ def get_retirement_chart_data(current_user, start_date, end_date):
 
 
 def get_retirement_account_balances(current_user, end_date):
-    """Calculate retirement account balances up to end_date."""
-    family_filter = get_family_filter(current_user)
+    """
+    Calculate retirement account balances up to end_date.
+    Uses balance history for all retirement accounts, pension PV for pensions.
+    """
     retirement_accounts = get_retirement_accounts(current_user.family_id)
 
     balances = {}
+    account_details = []
 
     for account in retirement_accounts:
-        # Sum all transactions for this account up to end_date
-        total = db.session.query(func.sum(Transaction.amount)).filter(
-            family_filter,
-            Transaction.account_id == account.id,
-            Transaction.timestamp <= end_date
-        ).scalar() or 0
+        if account.is_pension():
+            # Pensions use present value calculation
+            balance = float(account.get_pension_present_value())
+            account_details.append({
+                'name': account.name,
+                'balance': balance,
+                'retirement_type': account.retirement_type,
+                'is_pension': True,
+                'pension_monthly_benefit': float(account.pension_monthly_benefit) if account.pension_monthly_benefit else None,
+                'pension_start_date': account.pension_start_date
+            })
+        else:
+            # Use balance history for retirement accounts
+            query = AccountBalanceHistory.query.filter_by(account_id=account.id)
+            if end_date:
+                query = query.filter(AccountBalanceHistory.as_of_date <= end_date)
 
-        balances[account.name] = total
+            latest = query.order_by(AccountBalanceHistory.as_of_date.desc()).first()
+            balance = float(latest.balance) if latest else float(account.initial_balance or 0)
+            account_details.append({
+                'name': account.name,
+                'balance': balance,
+                'retirement_type': account.retirement_type,
+                'is_pension': False
+            })
 
-    return balances
+        balances[account.name] = balance
+
+    return balances, account_details
 
 
 def get_family_filter(current_user):

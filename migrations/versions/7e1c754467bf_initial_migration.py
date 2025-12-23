@@ -1,8 +1,8 @@
 """initial migration
 
-Revision ID: 58c3ce431248
+Revision ID: 7e1c754467bf
 Revises: 
-Create Date: 2025-12-23 22:22:45.063671
+Create Date: 2025-12-23 23:59:43.667298
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '58c3ce431248'
+revision = '7e1c754467bf'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -45,9 +45,11 @@ def upgrade():
     sa.Column('description_field', sa.String(length=128), nullable=True),
     sa.Column('family_id', sa.Integer(), nullable=False),
     sa.Column('positive_expense', sa.Boolean(), nullable=True),
-    sa.Column('account_type', sa.Enum('checking', 'savings', 'credit_card', 'retirement', 'brokerage', name='account_type_enum'), nullable=False),
-    sa.Column('retirement_type', sa.Enum('traditional_401k', 'roth_401k', 'traditional_ira', 'roth_ira', 'sep_ira', '403b', name='retirement_type_enum'), nullable=True),
+    sa.Column('account_type', sa.Enum('checking', 'savings', 'credit_card', 'retirement', 'brokerage', 'real_estate', 'vehicle', 'other_asset', 'loan', name='account_type_enum'), nullable=False),
+    sa.Column('retirement_type', sa.Enum('traditional_401k', 'roth_401k', 'traditional_ira', 'roth_ira', 'sep_ira', '403b', 'pension', name='retirement_type_enum'), nullable=True),
     sa.Column('initial_balance', sa.Numeric(precision=15, scale=2), nullable=False),
+    sa.Column('pension_monthly_benefit', sa.Numeric(precision=10, scale=2), nullable=True),
+    sa.Column('pension_start_date', sa.Date(), nullable=True),
     sa.ForeignKeyConstraint(['family_id'], ['family.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name', 'family_id', name='_account_family_uc')

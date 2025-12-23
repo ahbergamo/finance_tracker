@@ -9,6 +9,7 @@ import datetime
 import calendar
 from dateutil.relativedelta import relativedelta
 from app.models.budget import Budget
+from app.services.reports.net_worth import get_net_worth_summary
 
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -308,6 +309,9 @@ def dashboard():
     pie_start_date = start_date.strftime("%Y-%m-%d")
     pie_end_date = end_date.strftime("%Y-%m-%d")
 
+    # Get net worth summary (includes retirement data)
+    net_worth_data = get_net_worth_summary(current_user)
+
     return render_template("dashboard.html",
                            total_income=total_income,
                            total_expenses=total_expenses,
@@ -337,5 +341,6 @@ def dashboard():
                            income_list_top_n=income_list_top_n,
                            expense_list_top_n=expense_list_top_n,
                            income_category_list=income_category_list,
-                           expense_category_list=expense_category_list
+                           expense_category_list=expense_category_list,
+                           net_worth_data=net_worth_data
                            )

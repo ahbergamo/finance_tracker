@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models.transaction import Transaction
 from app.models.category import Category
-from app.models.account import Account
+from app.models.account import Account, TRANSACTION_ACCOUNT_TYPES
 from app.routes.transactions import transactions_bp
 from app.services.transactions.utilities import get_family_user_ids
 
@@ -101,7 +101,10 @@ def render_edit_transaction_form(transaction):
     """
     try:
         categories = Category.query.filter_by(family_id=current_user.family_id).all()
-        account_types = Account.query.filter_by(family_id=current_user.family_id).all()
+        # Only show transaction-based accounts (not retirement, brokerage, etc.)
+        account_types = Account.query.filter_by(family_id=current_user.family_id).filter(
+            Account.account_type.in_(TRANSACTION_ACCOUNT_TYPES)
+        ).all()
     except Exception as e:
         current_app.logger.error("Error fetching categories or account types: %s", str(e))
         flash("An error occurred while loading the form.", "danger")

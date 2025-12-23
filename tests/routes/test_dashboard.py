@@ -34,5 +34,25 @@ def test_set_chart_slices(client):
     assert b"Income chart slice settings updated." in response.data
 
 
-# Additional tests for other aspects of the dashboard (e.g. totals, monthly data, etc.)
-# could be added here following a similar pattern.
+def test_dashboard_includes_net_worth_card(client):
+    """
+    Test that the dashboard includes the Net Worth Summary card.
+    """
+    login(client, "user1", "test123")
+
+    response = client.get("/dashboard")
+    assert response.status_code == 200
+    assert b"Net Worth Summary" in response.data
+    assert b"Assets" in response.data
+    assert b"Liabilities" in response.data
+
+
+def test_dashboard_includes_retirement_card(client):
+    """
+    Test that the dashboard includes the Retirement Accounts card.
+    """
+    login(client, "user1", "test123")
+
+    response = client.get("/dashboard")
+    assert response.status_code == 200
+    assert b"Retirement Accounts" in response.data

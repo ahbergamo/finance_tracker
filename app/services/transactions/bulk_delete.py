@@ -3,7 +3,7 @@ from flask_login import current_user
 from app import db
 from app.models.transaction import Transaction
 from app.models.category import Category
-from app.models.account import Account
+from app.models.account import Account, TRANSACTION_ACCOUNT_TYPES
 from app.services.transactions.utilities import apply_date_filter
 
 
@@ -100,7 +100,10 @@ def render_bulk_delete_page(query, filters):
         transactions = pagination.items
         current_app.logger.debug("Retrieved %d transactions for page %d", len(transactions), page)
         categories = Category.query.filter_by(family_id=current_user.family_id).order_by(Category.name.asc()).all()
-        account_types = Account.query.filter_by(family_id=current_user.family_id).order_by(Account.name.asc()).all()
+        # Only show transaction-based accounts (not retirement, brokerage, etc.)
+        account_types = Account.query.filter_by(family_id=current_user.family_id).filter(
+            Account.account_type.in_(TRANSACTION_ACCOUNT_TYPES)
+        ).order_by(Account.name.asc()).all()
         current_app.logger.debug("Retrieved %d categories and %d account types for family_id %s",
                                  len(categories), len(account_types), current_user.family_id)
     except Exception as e:

@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, SubmitField, SelectField
+from wtforms import StringField, BooleanField, SubmitField, SelectField, DateField
 from wtforms.validators import DataRequired, Optional
 from app.forms.fields import MoneyField
 
@@ -48,8 +48,20 @@ class AccountTypeForm(FlaskForm):
             ('traditional_ira', 'Traditional IRA'),
             ('roth_ira', 'Roth IRA'),
             ('sep_ira', 'SEP IRA'),
-            ('403b', '403(b)')
+            ('403b', '403(b)'),
+            ('pension', 'Pension')
         ],
+        validators=[Optional()]
+    )
+
+    # Pension-specific fields (only shown when retirement_type = 'pension')
+    pension_monthly_benefit = MoneyField(
+        'Monthly Benefit',
+        places=2,
+        validators=[Optional()]
+    )
+    pension_start_date = DateField(
+        'Benefit Start Date',
         validators=[Optional()]
     )
 

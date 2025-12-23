@@ -33,8 +33,12 @@
                 {% elif account_type.retirement_type == 'roth_ira' %}Roth IRA
                 {% elif account_type.retirement_type == 'sep_ira' %}SEP IRA
                 {% elif account_type.retirement_type == '403b' %}403(b)
+                {% elif account_type.retirement_type == 'pension' %}Pension
                 {% endif %})
               </small>
+            {% endif %}
+            {% if account_type.retirement_type == 'pension' and account_type.pension_monthly_benefit %}
+              <br><small class="text-muted">${{ "{:,.2f}".format(account_type.pension_monthly_benefit) }}/mo starting {{ account_type.pension_start_date.strftime('%b %Y') if account_type.pension_start_date else 'TBD' }}</small>
             {% endif %}
           {% elif account_type.account_type == 'brokerage' %}
             Brokerage
@@ -60,7 +64,7 @@
         </td>
         <td>
           <div class="d-inline-flex" style="gap: 0.5rem;">
-            {% if account_type.account_type in ['retirement', 'brokerage', 'real_estate', 'vehicle', 'other_asset', 'loan'] %}
+            {% if account_type.account_type in ['retirement', 'brokerage', 'real_estate', 'vehicle', 'other_asset', 'loan'] and account_type.retirement_type != 'pension' %}
             <a href="{{ url_for('balance_history.index', account_id=account_type.id) }}" class="btn btn-outline-success"
               style="width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center;"
               data-bs-toggle="tooltip" data-bs-placement="top" title="Balance History">

@@ -48,7 +48,7 @@ def test_account_type_field(app):
     Verify that accounts have proper account_type values.
     """
     accounts = Account.query.all()
-    valid_types = {'checking', 'savings', 'credit_card', 'retirement', 'brokerage'}
+    valid_types = {'checking', 'savings', 'credit_card', 'retirement', 'brokerage', 'real_estate', 'vehicle', 'other_asset', 'loan'}
     for account in accounts:
         assert account.account_type in valid_types, f"Account {account.name} has invalid account_type: {account.account_type}"
 
@@ -105,3 +105,130 @@ def test_brokerage_account(app):
     assert saved.account_type == 'brokerage'
     assert saved.retirement_type is None  # Not a retirement account
     assert saved.initial_balance == 100000.00
+
+
+def test_pension_account(app):
+    """
+    Test creating a pension account with monthly benefit and start date.
+    """
+    from datetime import date
+    family = Family.query.first()
+    account = Account(
+        name="Test Pension",
+        family_id=family.id,
+        account_type='retirement',
+        retirement_type='pension',
+        pension_monthly_benefit=580.17,
+        pension_start_date=date(2044, 5, 1)
+    )
+    db.session.add(account)
+    db.session.commit()
+
+    saved = Account.query.filter_by(name="Test Pension").first()
+    assert saved is not None
+    assert saved.account_type == 'retirement'
+    assert saved.retirement_type == 'pension'
+    assert float(saved.pension_monthly_benefit) == 580.17
+    assert saved.pension_start_date == date(2044, 5, 1)
+
+
+def test_pension_is_pension_method(app):
+    """
+    Test the is_pension() helper method.
+    """
+    from datetime import date
+    family = Family.query.first()
+
+    # Pension account
+    pension = Account(
+        name="Boeing Pension",
+        family_id=family.id,
+        account_type='retirement',
+        retirement_type='pension',
+        pension_monthly_benefit=500.00,
+        pension_start_date=date(2044, 5, 1)
+    )
+    db.session.add(pension)
+
+    # Regular retirement account
+    retirement = Account(
+        name="401k Account",
+        family_id=family.id,
+        account_type='retirement',
+        retirement_type='traditional_401k',
+        initial_balance=50000.00
+    )
+    db.session.add(retirement)
+    db.session.commit()
+
+    assert pension.is_pension() is True
+    assert retirement.is_pension() is False
+
+
+def test_pension_present_value_calculation(app):
+    """
+    Test the pension present value calculation.
+    """
+    from datetime import date
+    family = Family.query.first()
+
+    account = Account(
+        name="Test Pension PV",
+        family_id=family.id,
+        account_type='retirement',
+        retirement_type='pension',
+        pension_monthly_benefit=1000.00,  # $1000/month
+        pension_start_date=date(2044, 5, 1)
+    )
+    db.session.add(account)
+    db.session.commit()
+
+    pv = account.get_pension_present_value()
+
+    # PV should be a positive number
+    assert pv > 0
+    # With $1000/month for 20 years at 4%, PV should be roughly $163k-170k
+    # (discounted back ~19 years from 2044 to 2025)
+    # The exact value depends on the calculation date
+    assert pv < 200000  # Sanity check - shouldn't be more than simple sum
+
+
+def test_pension_present_value_no_benefit(app):
+    """
+    Test that pension PV returns 0 when no benefit is set.
+    """
+    from decimal import Decimal
+    family = Family.query.first()
+
+    account = Account(
+        name="Empty Pension",
+        family_id=family.id,
+        account_type='retirement',
+        retirement_type='pension'
+    )
+    db.session.add(account)
+    db.session.commit()
+
+    pv = account.get_pension_present_value()
+    assert pv == Decimal('0')
+
+
+def test_pension_present_value_no_start_date(app):
+    """
+    Test that pension PV returns 0 when no start date is set.
+    """
+    from decimal import Decimal
+    family = Family.query.first()
+
+    account = Account(
+        name="Pension No Date",
+        family_id=family.id,
+        account_type='retirement',
+        retirement_type='pension',
+        pension_monthly_benefit=500.00
+    )
+    db.session.add(account)
+    db.session.commit()
+
+    pv = account.get_pension_present_value()
+    assert pv == Decimal('0')

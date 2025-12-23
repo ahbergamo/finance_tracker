@@ -1,7 +1,7 @@
 from flask import current_app, flash
 from app import db
 from app.models.import_rule import ImportRule
-from app.models.account import Account
+from app.models.account import Account, TRANSACTION_ACCOUNT_TYPES
 from app.models.category import Category
 from app.models.user import User
 
@@ -12,7 +12,10 @@ def fetch_account_types_and_categories(family_id):
     """
     current_app.logger.debug("Fetching account types and categories for family_id=%s", family_id)
     try:
-        account_types = Account.query.filter_by(family_id=family_id).all()
+        # Only show transaction-based accounts (not retirement, brokerage, etc.)
+        account_types = Account.query.filter_by(family_id=family_id).filter(
+            Account.account_type.in_(TRANSACTION_ACCOUNT_TYPES)
+        ).all()
         categories = Category.query.filter_by(family_id=family_id).all()
         current_app.logger.debug("Fetched %d account types and %d categories for family_id=%s",
                                  len(account_types), len(categories), family_id)

@@ -16,13 +16,35 @@
     </div>
     <div class="col-md-4" id="retirement-type-container" style="display: none;">
       {{ form.retirement_type.label(class="form-label") }}
-      {{ form.retirement_type(class="form-select form-select-sm") }}
+      {{ form.retirement_type(class="form-select form-select-sm", id="retirement-type-select") }}
     </div>
-    <div class="col-md-4">
+    <div class="col-md-4" id="initial-balance-container">
       {{ form.initial_balance.label(class="form-label") }}
       <div class="input-group input-group-sm">
         <span class="input-group-text">$</span>
         {{ form.initial_balance(class="form-control form-control-sm", step="0.01") }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Pension-specific fields -->
+  <div class="row mb-3" id="pension-fields" style="display: none;">
+    <div class="col-md-4">
+      {{ form.pension_monthly_benefit.label(class="form-label") }}
+      <div class="input-group input-group-sm">
+        <span class="input-group-text">$</span>
+        {{ form.pension_monthly_benefit(class="form-control form-control-sm", step="0.01") }}
+        <span class="input-group-text">/month</span>
+      </div>
+    </div>
+    <div class="col-md-4">
+      {{ form.pension_start_date.label(class="form-label") }}
+      {{ form.pension_start_date(class="form-control form-control-sm", type="date") }}
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">&nbsp;</label>
+      <div class="form-text small">
+        <strong>Note:</strong> Estimated present value will be calculated automatically using a 4% discount rate and 20-year payout assumption.
       </div>
     </div>
   </div>
@@ -99,6 +121,14 @@
     }
   }
 
+  function updatePensionFields() {
+    var retirementType = document.getElementById('retirement-type-select').value;
+    var isPension = (retirementType === 'pension');
+    document.getElementById('pension-fields').style.display = isPension ? 'flex' : 'none';
+    // Hide initial balance for pensions since we calculate PV from benefit
+    document.getElementById('initial-balance-container').style.display = isPension ? 'none' : 'block';
+  }
+
   // Show/hide retirement type, pre-defined dropdown, and CSV fields based on account type
   document.getElementById('account-type-select').addEventListener('change', function() {
     var retirementContainer = document.getElementById('retirement-type-container');
@@ -106,7 +136,18 @@
 
     retirementContainer.style.display = (this.value === 'retirement') ? 'block' : 'none';
     setCsvFieldsEnabled(isTransactionBased);
+
+    // Reset pension fields when switching away from retirement
+    if (this.value !== 'retirement') {
+      document.getElementById('pension-fields').style.display = 'none';
+      document.getElementById('initial-balance-container').style.display = 'block';
+    } else {
+      updatePensionFields();
+    }
   });
+
+  // Show/hide pension fields based on retirement type
+  document.getElementById('retirement-type-select').addEventListener('change', updatePensionFields);
 
   // Pre-defined account selection
   document.getElementById('predefined-select').addEventListener('change', function () {

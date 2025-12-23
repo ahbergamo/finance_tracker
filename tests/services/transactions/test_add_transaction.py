@@ -120,7 +120,8 @@ class TestAddTransactionService(unittest.TestCase):
         dummy_categories = ["Cat1", "Cat2"]
         dummy_accounts = ["Acc1"]
         mock_category.query.filter_by.return_value.all.return_value = dummy_categories
-        mock_account.query.filter_by.return_value.all.return_value = dummy_accounts
+        # Account query now includes .filter() for transaction account types
+        mock_account.query.filter_by.return_value.filter.return_value.all.return_value = dummy_accounts
 
         dummy_user = DummyUser()
         app = Flask("test_app")
