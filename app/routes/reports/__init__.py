@@ -8,3 +8,4 @@ from app.routes.reports import monthly          # noqa: E402, F401
 from app.routes.reports import annual           # noqa: E402, F401
 from app.routes.reports import income_expense   # noqa: E402, F401
 from app.routes.reports import retirement       # noqa: E402, F401
+from app.routes.reports import net_worth        # noqa: E402, F401

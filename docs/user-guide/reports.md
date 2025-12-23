@@ -78,6 +78,24 @@ Track retirement savings and contributions:
 - Progress toward goals
 - Account performance review
 
+### Net Worth Report
+
+**Path:** Reports → Net Worth
+
+Track your total net worth across all accounts:
+
+- Total assets and liabilities summary
+- Net worth calculation
+- Account breakdown by type (checking, savings, retirement, brokerage, credit cards)
+- 12-month net worth trend chart
+- Current balance for each account
+
+**Use Cases:**
+- Overall financial health tracking
+- Wealth building progress
+- Asset allocation review
+- Long-term financial planning
+
 ## Report Features
 
 ### Date Range Selection

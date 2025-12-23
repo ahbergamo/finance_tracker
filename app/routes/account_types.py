@@ -3,7 +3,9 @@ from flask_login import current_user, login_required
 from app import db
 from app.models.account import Account
 from app.models.pre_defined_account import PreDefinedAccount
+from app.models.user import User
 from app.forms.account_type_form import AccountTypeForm
+from app.services.reports.net_worth import get_account_balance
 
 
 # Blueprint for account types (keeping URL structure for backward compatibility)
@@ -14,16 +16,26 @@ account_types_bp = Blueprint('account_types', __name__, template_folder='../temp
 @login_required
 def index():
     """
-    List all account types for the current user's family.
+    List all account types for the current user's family with current balances.
     """
     try:
         account_types = Account.query.filter_by(family_id=current_user.family_id).all()
         current_app.logger.info("Listing %d accounts for family_id %s", len(account_types), current_user.family_id)
+
+        # Get user IDs for balance calculation
+        user_ids = [u.id for u in User.query.filter_by(family_id=current_user.family_id).all()]
+
+        # Calculate balance for each account
+        account_balances = {}
+        for account in account_types:
+            account_balances[account.id] = get_account_balance(account, user_ids)
+
     except Exception as e:
         current_app.logger.error("Error fetching accounts: %s", str(e))
         flash('An error occurred while fetching accounts.', 'danger')
         account_types = []
-    return render_template('account_types/index.html', account_types=account_types)
+        account_balances = {}
+    return render_template('account_types/index.html', account_types=account_types, account_balances=account_balances)
 
 
 @account_types_bp.route('/account_types/add', methods=['GET', 'POST'])

@@ -8,6 +8,7 @@
       <tr>
         <th>Name</th>
         <th>Type</th>
+        <th class="text-end">Balance</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -17,32 +18,55 @@
         <td>{{ account_type.name }}</td>
         <td>
           {% if account_type.account_type == 'checking' %}
-            <span class="badge bg-primary">Checking</span>
+            Checking
           {% elif account_type.account_type == 'savings' %}
-            <span class="badge bg-success">Savings</span>
+            Savings
           {% elif account_type.account_type == 'credit_card' %}
-            <span class="badge bg-warning text-dark">Credit Card</span>
+            Credit Card
           {% elif account_type.account_type == 'retirement' %}
-            <span class="badge bg-info">Retirement</span>
+            Retirement
             {% if account_type.retirement_type %}
-              <small class="text-muted ms-1">
-                {% if account_type.retirement_type == 'traditional_401k' %}Traditional 401(k)
+              <small class="text-muted">
+                ({% if account_type.retirement_type == 'traditional_401k' %}Traditional 401(k)
                 {% elif account_type.retirement_type == 'roth_401k' %}Roth 401(k)
                 {% elif account_type.retirement_type == 'traditional_ira' %}Traditional IRA
                 {% elif account_type.retirement_type == 'roth_ira' %}Roth IRA
                 {% elif account_type.retirement_type == 'sep_ira' %}SEP IRA
                 {% elif account_type.retirement_type == '403b' %}403(b)
-                {% endif %}
+                {% endif %})
               </small>
             {% endif %}
           {% elif account_type.account_type == 'brokerage' %}
-            <span class="badge bg-secondary">Brokerage</span>
+            Brokerage
+          {% elif account_type.account_type == 'real_estate' %}
+            Real Estate
+          {% elif account_type.account_type == 'vehicle' %}
+            Vehicle
+          {% elif account_type.account_type == 'other_asset' %}
+            Other Asset
+          {% elif account_type.account_type == 'loan' %}
+            Loan
           {% else %}
-            <span class="badge bg-light text-dark">{{ account_type.account_type or 'checking' }}</span>
+            {{ account_type.account_type|default('Checking')|title }}
+          {% endif %}
+        </td>
+        <td class="text-end">
+          {% set balance = account_balances.get(account_type.id, 0) %}
+          {% if balance < 0 %}
+            <span class="text-danger">${{ "{:,.2f}".format(balance) }}</span>
+          {% else %}
+            ${{ "{:,.2f}".format(balance) }}
           {% endif %}
         </td>
         <td>
           <div class="d-inline-flex" style="gap: 0.5rem;">
+            {% if account_type.account_type in ['retirement', 'brokerage', 'real_estate', 'vehicle', 'other_asset', 'loan'] %}
+            <a href="{{ url_for('balance_history.index', account_id=account_type.id) }}" class="btn btn-outline-success"
+              style="width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center;"
+              data-bs-toggle="tooltip" data-bs-placement="top" title="Balance History">
+              <i class="bi bi-graph-up fs-5"></i>
+            </a>
+            {% endif %}
             <a href="{{ url_for('account_types.edit_account_type', id=account_type.id) }}" class="btn btn-primary"
               style="width: 2.5rem; height: 2.5rem; display: inline-flex; align-items: center; justify-content: center;"
               data-bs-toggle="tooltip" data-bs-placement="top" title="Edit Account">

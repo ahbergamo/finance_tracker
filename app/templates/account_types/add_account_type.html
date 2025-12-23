@@ -1,19 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Add Account</h1>
-<div class="mb-3">
-  <label for="predefined-select" class="form-label">Pre-defined Account</label>
-  <select id="predefined-select" class="form-select form-select-sm">
-    <option value="">-- Select a pre-defined account --</option>
-    {% for pre in pre_defined_accounts %}
-    <option value="{{ pre.id }}" data-name="{{ pre.name }}" data-category="{{ pre.category_field }}"
-      data-date="{{ pre.date_field }}" data-amount="{{ pre.amount_field }}"
-      data-description="{{ pre.description_field }}" data-positive="{{ pre.positive_expense|lower }}">
-      {{ pre.name }}
-    </option>
-    {% endfor %}
-  </select>
-</div>
 <form method="POST">
   {{ form.hidden_tag() }}
 
@@ -40,9 +27,24 @@
     </div>
   </div>
 
-  <div id="csv-fields">
+  <div class="mb-3" id="predefined-container" style="display: none;">
+    <label for="predefined-select" class="form-label">Pre-defined Account Template</label>
+    <select id="predefined-select" class="form-select form-select-sm">
+      <option value="">-- Select a template (optional) --</option>
+      {% for pre in pre_defined_accounts %}
+      <option value="{{ pre.id }}" data-name="{{ pre.name }}" data-category="{{ pre.category_field }}"
+        data-date="{{ pre.date_field }}" data-amount="{{ pre.amount_field }}"
+        data-description="{{ pre.description_field }}" data-positive="{{ pre.positive_expense|lower }}">
+        {{ pre.name }}
+      </option>
+      {% endfor %}
+    </select>
+    <div class="form-text">Select a template to auto-fill CSV settings for common banks.</div>
+  </div>
+
+  <div id="csv-fields" style="display: none;">
     <h5 class="mt-4 mb-3">CSV Import Settings</h5>
-    <p class="text-muted small">Configure how to parse CSV files for this account. Optional for retirement/brokerage accounts.</p>
+    <p class="text-muted small">Configure how to parse CSV files for this account.</p>
 
     <div class="mb-3">
       {{ form.category_field.label(class="form-label") }}
@@ -73,14 +75,37 @@
 </form>
 
 <script>
-  // Show/hide retirement type based on account type selection
+  var csvFieldIds = [
+    "{{ form.category_field.id }}",
+    "{{ form.date_field.id }}",
+    "{{ form.amount_field.id }}",
+    "{{ form.description_field.id }}"
+  ];
+
+  function setCsvFieldsEnabled(enabled) {
+    csvFieldIds.forEach(function(id) {
+      var field = document.getElementById(id);
+      if (!enabled) field.value = "";
+      field.disabled = !enabled;
+    });
+    var positiveExpense = document.getElementById("{{ form.positive_expense.id }}");
+    if (!enabled) positiveExpense.checked = false;
+    positiveExpense.disabled = !enabled;
+    document.getElementById("csv-fields").style.display = enabled ? "block" : "none";
+    document.getElementById("predefined-container").style.display = enabled ? "block" : "none";
+    // Reset pre-defined selection when hiding
+    if (!enabled) {
+      document.getElementById("predefined-select").selectedIndex = 0;
+    }
+  }
+
+  // Show/hide retirement type, pre-defined dropdown, and CSV fields based on account type
   document.getElementById('account-type-select').addEventListener('change', function() {
     var retirementContainer = document.getElementById('retirement-type-container');
-    if (this.value === 'retirement') {
-      retirementContainer.style.display = 'block';
-    } else {
-      retirementContainer.style.display = 'none';
-    }
+    var isTransactionBased = (this.value === 'checking' || this.value === 'savings' || this.value === 'credit_card');
+
+    retirementContainer.style.display = (this.value === 'retirement') ? 'block' : 'none';
+    setCsvFieldsEnabled(isTransactionBased);
   });
 
   // Pre-defined account selection

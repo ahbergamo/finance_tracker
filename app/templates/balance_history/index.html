@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('account_types.index') }}">Accounts</a></li>
+      <li class="breadcrumb-item active">{{ account.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1>{{ account.name }}</h1>
+      <span class="badge bg-{% if account.account_type == 'retirement' %}info{% else %}secondary{% endif %}">
+        {{ account.account_type|capitalize }}
+      </span>
+      {% if account.retirement_type %}
+        <small class="text-muted ms-2">
+          {% if account.retirement_type == 'traditional_401k' %}Traditional 401(k)
+          {% elif account.retirement_type == 'roth_401k' %}Roth 401(k)
+          {% elif account.retirement_type == 'traditional_ira' %}Traditional IRA
+          {% elif account.retirement_type == 'roth_ira' %}Roth IRA
+          {% elif account.retirement_type == 'sep_ira' %}SEP IRA
+          {% elif account.retirement_type == '403b' %}403(b)
+          {% endif %}
+        </small>
+      {% endif %}
+    </div>
+    {% if balances %}
+    <div class="text-end">
+      <small class="text-muted">Current Balance</small>
+      <h3 class="mb-0">${{ "{:,.2f}".format(balances[0].balance) }}</h3>
+      <small class="text-muted">as of {{ balances[0].as_of_date.strftime('%b %d, %Y') }}</small>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Balance History</h5>
+        </div>
+        <div class="card-body">
+          {% if balances %}
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th class="text-end">Balance</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for balance in balances %}
+              <tr>
+                <td>{{ balance.as_of_date.strftime('%Y-%m-%d') }}</td>
+                <td class="text-end">${{ "{:,.2f}".format(balance.balance) }}</td>
+                <td>{{ balance.notes or '' }}</td>
+                <td>
+                  <form action="{{ url_for('balance_history.delete_balance', account_id=account.id, balance_id=balance.id) }}"
+                        method="POST" style="display: inline;"
+                        onsubmit="return confirm('Delete this balance entry?');">
+                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p class="text-muted">No balance history yet. Add your first balance entry.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">Add Balance</h5>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('balance_history.add_balance', account_id=account.id) }}">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.as_of_date.label(class="form-label") }}
+              {{ form.as_of_date(class="form-control form-control-sm", type="date") }}
+            </div>
+
+            <div class="mb-3">
+              {{ form.balance.label(class="form-label") }}
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                {{ form.balance(class="form-control form-control-sm", step="0.01", placeholder="0.00") }}
+              </div>
+            </div>
+
+            <div class="mb-3">
+              {{ form.notes.label(class="form-label") }}
+              {{ form.notes(class="form-control form-control-sm", rows="2", placeholder="Optional notes...") }}
+            </div>
+
+            {{ form.submit(class="btn btn-primary btn-sm w-100") }}
+          </form>
+        </div>
+      </div>
+
+      {% if account.initial_balance %}
+      <div class="card mt-3">
+        <div class="card-body">
+          <small class="text-muted">Initial Balance</small>
+          <h5 class="mb-0">${{ "{:,.2f}".format(account.initial_balance) }}</h5>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

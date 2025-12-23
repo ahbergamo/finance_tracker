@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% block title %}Net Worth Report{% endblock %}
+{% block content %}
+<div class="container">
+  <h1 class="mb-4">Net Worth</h1>
+
+  <!-- Summary Cards -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card bg-success text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title">Total Assets</h6>
+          <h3 class="mb-0">${{ "{:,.2f}".format(total_assets) }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-danger text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title">Total Liabilities</h6>
+          <h3 class="mb-0">${{ "{:,.2f}".format(total_liabilities) }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card {% if net_worth >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
+        <div class="card-body text-center">
+          <h6 class="card-title">Net Worth</h6>
+          <h3 class="mb-0">${{ "{:,.2f}".format(net_worth) }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Net Worth Chart -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">Net Worth Over Time (12 Months)</h5>
+    </div>
+    <div class="card-body">
+      <canvas id="netWorthChart" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- Account Breakdown -->
+  <div class="row">
+    <!-- Assets Column -->
+    <div class="col-md-6">
+      <h4 class="mb-3">Assets</h4>
+
+      <!-- Checking Accounts -->
+      {% if summary.checking.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-bank"></i> Checking</span>
+          <strong>${{ "{:,.2f}".format(summary.checking.total) }}</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.checking.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ account.name }}</span>
+            <span class="{% if account.balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+              ${{ "{:,.2f}".format(account.balance) }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Savings Accounts -->
+      {% if summary.savings.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-piggy-bank"></i> Savings</span>
+          <strong>${{ "{:,.2f}".format(summary.savings.total) }}</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.savings.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ account.name }}</span>
+            <span class="text-success">${{ "{:,.2f}".format(account.balance) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Retirement Accounts -->
+      {% if summary.retirement.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-graph-up-arrow"></i> Retirement</span>
+          <strong>${{ "{:,.2f}".format(summary.retirement.total) }}</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.retirement.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>
+              {{ account.name }}
+              {% if account.retirement_type %}
+              <small class="text-muted">
+                ({% if account.retirement_type == 'traditional_401k' %}Traditional 401k
+                {% elif account.retirement_type == 'roth_401k' %}Roth 401k
+                {% elif account.retirement_type == 'traditional_ira' %}Traditional IRA
+                {% elif account.retirement_type == 'roth_ira' %}Roth IRA
+                {% elif account.retirement_type == 'sep_ira' %}SEP IRA
+                {% elif account.retirement_type == '403b' %}403b
+                {% endif %})
+              </small>
+              {% endif %}
+            </span>
+            <span class="text-success">${{ "{:,.2f}".format(account.balance) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Brokerage Accounts -->
+      {% if summary.brokerage.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-bar-chart"></i> Brokerage</span>
+          <strong>${{ "{:,.2f}".format(summary.brokerage.total) }}</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.brokerage.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ account.name }}</span>
+            <span class="text-success">${{ "{:,.2f}".format(account.balance) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Real Estate -->
+      {% if summary.real_estate.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-house"></i> Real Estate</span>
+          <strong>${{ "{:,.2f}".format(summary.real_estate.total) }}</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.real_estate.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ account.name }}</span>
+            <span class="text-success">${{ "{:,.2f}".format(account.balance) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Vehicles -->
+      {% if summary.vehicle.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-car-front"></i> Vehicles</span>
+          <strong>${{ "{:,.2f}".format(summary.vehicle.total) }}</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.vehicle.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ account.name }}</span>
+            <span class="text-success">${{ "{:,.2f}".format(account.balance) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Other Assets -->
+      {% if summary.other_asset.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-box"></i> Other Assets</span>
+          <strong>${{ "{:,.2f}".format(summary.other_asset.total) }}</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.other_asset.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ account.name }}</span>
+            <span class="text-success">${{ "{:,.2f}".format(account.balance) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Liabilities Column -->
+    <div class="col-md-6">
+      <h4 class="mb-3">Liabilities</h4>
+
+      <!-- Credit Cards -->
+      {% if summary.credit_card.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-credit-card"></i> Credit Cards</span>
+          <strong class="{% if summary.credit_card.total < 0 %}text-danger{% endif %}">
+            ${{ "{:,.2f}".format(summary.credit_card.total|abs) }}
+          </strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.credit_card.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ account.name }}</span>
+            <span class="{% if account.balance < 0 %}text-danger{% else %}text-success{% endif %}">
+              ${{ "{:,.2f}".format(account.balance|abs) }}
+              {% if account.balance > 0 %}<small class="text-muted">(credit)</small>{% endif %}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <!-- Loans -->
+      {% if summary.loan.accounts %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+          <span><i class="bi bi-cash-stack"></i> Loans</span>
+          <strong class="text-danger">${{ "{:,.2f}".format(summary.loan.total|abs) }}</strong>
+        </div>
+        <ul class="list-group list-group-flush">
+          {% for account in summary.loan.accounts %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ account.name }}</span>
+            <span class="text-danger">${{ "{:,.2f}".format(account.balance|abs) }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if not summary.credit_card.accounts and not summary.loan.accounts %}
+      <div class="card mb-3">
+        <div class="card-body text-muted">
+          No liabilities.
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('netWorthChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ chart_labels|tojson }},
+      datasets: [
+        {
+          label: 'Net Worth',
+          data: {{ chart_net_worth|tojson }},
+          borderColor: 'rgb(13, 110, 253)',
+          backgroundColor: 'rgba(13, 110, 253, 0.1)',
+          fill: true,
+          tension: 0.3
+        },
+        {
+          label: 'Assets',
+          data: {{ chart_assets|tojson }},
+          borderColor: 'rgb(25, 135, 84)',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          tension: 0.3
+        },
+        {
+          label: 'Liabilities',
+          data: {{ chart_liabilities|tojson }},
+          borderColor: 'rgb(220, 53, 69)',
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': $' + context.raw.toLocaleString('en-US', {minimumFractionDigits: 2});
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: function(value) {
+              return '$' + value.toLocaleString('en-US');
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}

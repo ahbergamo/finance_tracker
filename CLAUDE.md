@@ -54,7 +54,8 @@ finance_tracker/
 - **Transaction**: Core financial record (amount, description, category, account)
 - **Category**: Transaction categories, scoped to family
 - **Budget**: Spending limits with many-to-many relationship to categories
-- **AccountType**: CSV field mappings for import (date, amount, description fields)
+- **Account**: Bank accounts with type (checking, savings, credit_card, retirement, brokerage), CSV field mappings, and initial balance
+- **AccountBalanceHistory**: Balance snapshots for retirement/brokerage accounts (date + balance)
 - **ImportRule**: Pattern-based auto-categorization during CSV import
 
 ## Common Commands
@@ -107,9 +108,10 @@ REDIS_URL=redis://localhost:6379
 | `/transactions/import` | CSV import with preview |
 | `/budgets` | Budget management |
 | `/categories` | Category management |
-| `/account-types` | CSV import field mappings |
+| `/account_types` | Account management (checking, savings, credit card, retirement, brokerage) |
+| `/accounts/<id>/balances` | Balance history for retirement/brokerage accounts |
 | `/import-rules` | Auto-categorization rules |
-| `/reports/*` | Monthly, annual, income/expense reports |
+| `/reports/*` | Monthly, annual, income/expense, retirement, net worth reports |
 
 ## CSV Import Flow
 

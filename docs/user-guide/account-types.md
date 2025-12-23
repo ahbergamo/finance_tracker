@@ -1,17 +1,35 @@
-# Account Types
+# Accounts
 
-Account Types define how FRacker parses CSV files from your bank. This guide explains how to configure them for accurate imports.
+Accounts in FRacker represent your bank accounts, credit cards, retirement accounts, and investment accounts. This guide explains the different account types and how to configure them.
 
-## What Are Account Types?
+## Account Types
 
-Account Types are templates that tell FRacker:
+FRacker supports five types of accounts:
+
+| Type | Description | Balance Tracking |
+|------|-------------|------------------|
+| **Checking** | Bank checking accounts | Transaction-based |
+| **Savings** | Bank savings accounts | Transaction-based |
+| **Credit Card** | Credit card accounts | Transaction-based |
+| **Retirement** | 401(k), IRA, 403(b), etc. | Balance history |
+| **Brokerage** | Investment/brokerage accounts | Balance history |
+
+### Transaction-Based vs Balance History
+
+**Transaction-based accounts** (checking, savings, credit cards) calculate their balance from imported transactions. You upload CSV files from your bank, and FRacker calculates the balance.
+
+**Balance history accounts** (retirement, brokerage) track balances you manually enter over time. This is ideal for accounts where you care about the total balance rather than individual transactions (like 401k statements).
+
+## CSV Import Configuration
+
+For transaction-based accounts, you configure how FRacker parses CSV files from your bank:
 
 - Which CSV column contains transaction dates
 - Which column has the transaction amount
 - Which column has the description/merchant name
 - Whether positive values are expenses or income
 
-Different banks use different CSV formats, so you'll need an Account Type for each bank account you import from.
+Different banks use different CSV formats, so you'll need to configure each account's CSV settings.
 
 ## Pre-Configured Account Types
 
@@ -313,6 +331,67 @@ If bank categories aren't coming through:
 3. **Document Settings** - Keep notes on which settings work for each bank
 4. **Regular Review** - Banks sometimes change CSV formats - review periodically
 5. **Backup** - Export your data before making major Account Type changes
+
+## Retirement & Brokerage Accounts
+
+Retirement and brokerage accounts work differently from checking/savings/credit card accounts. Instead of importing transactions, you manually track balance snapshots over time.
+
+### Creating a Retirement Account
+
+1. Navigate to **Settings → Accounts**
+2. Click **Add Account**
+3. Select **Retirement** as the Account Type
+4. Choose the retirement type:
+   - Traditional 401(k)
+   - Roth 401(k)
+   - Traditional IRA
+   - Roth IRA
+   - SEP IRA
+   - 403(b)
+5. Enter an **Initial Balance** (optional)
+6. Click **Save**
+
+CSV fields are optional for retirement accounts since you'll track balances manually.
+
+### Creating a Brokerage Account
+
+1. Navigate to **Settings → Accounts**
+2. Click **Add Account**
+3. Select **Brokerage** as the Account Type
+4. Enter an **Initial Balance** (optional)
+5. Click **Save**
+
+### Adding Balance History
+
+For retirement and brokerage accounts, you track balances over time:
+
+1. Go to **Settings → Accounts**
+2. Click the **graph icon** next to your retirement/brokerage account
+3. Enter the **date** and **balance**
+4. Add optional **notes**
+5. Click **Add Balance**
+
+You can add balance entries whenever you receive a statement or want to track changes. These entries are used to:
+
+- Show current balance on the Net Worth report
+- Track balance growth over time
+- Calculate historical net worth
+
+### Viewing Balance History
+
+1. Go to **Settings → Accounts**
+2. Click the **graph icon** next to the account
+3. View all balance entries in the table
+4. Delete entries if needed
+
+### Net Worth Report
+
+All account balances (transaction-based and balance history) are combined in the **Reports → Net Worth** report, which shows:
+
+- Total assets and liabilities
+- Net worth calculation
+- 12-month trend chart
+- Breakdown by account type
 
 ## Next Steps
 

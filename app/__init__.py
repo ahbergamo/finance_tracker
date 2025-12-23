@@ -79,6 +79,7 @@ def create_app(test_config=None):
     from app.routes.import_rules import import_rules_bp
     from app.routes.reports import report_bp
     from app.routes.help import help_bp
+    from app.routes.balance_history import balance_history_bp
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -95,6 +96,7 @@ def create_app(test_config=None):
     app.register_blueprint(import_rules_bp)
     app.register_blueprint(report_bp)
     app.register_blueprint(help_bp)
+    app.register_blueprint(balance_history_bp)
 
     # Default route that redirects to the login page
     @app.route("/")

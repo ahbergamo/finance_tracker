@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, DecimalField, SelectMultipleField, DateField, SubmitField
+from wtforms import StringField, SelectMultipleField, DateField, SubmitField
 from wtforms.validators import DataRequired, NumberRange, Optional
 from app.models.category import Category
+from app.forms.fields import MoneyField
 
 
 def populate_category_choices(family_id):
@@ -27,7 +28,7 @@ def populate_category_choices(family_id):
 class EditBudgetForm(FlaskForm):
     # Form fields for editing a budget
     name = StringField("Budget Name", validators=[DataRequired()])
-    amount = DecimalField("Amount", validators=[DataRequired(), NumberRange(min=0)], places=2)
+    amount = MoneyField("Amount", validators=[DataRequired(), NumberRange(min=0)], places=2)
     start_date = DateField("Start Date", validators=[Optional()])
     end_date = DateField("End Date", validators=[Optional()])
     # Use coerce=int to convert selected values to integers
@@ -62,7 +63,7 @@ class EditBudgetForm(FlaskForm):
 class AddBudgetForm(FlaskForm):
     # Form fields for adding a new budget
     name = StringField("Budget Name", validators=[DataRequired()])
-    amount = DecimalField("Amount", validators=[DataRequired(), NumberRange(min=0)], places=2)
+    amount = MoneyField("Amount", validators=[DataRequired(), NumberRange(min=0)], places=2)
     start_date = DateField("Start Date", validators=[Optional()])
     end_date = DateField("End Date", validators=[Optional()])
     # Use coerce=int for proper type conversion

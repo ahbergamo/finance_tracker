@@ -1,8 +1,8 @@
 """initial migration
 
-Revision ID: 615f3ee0a9d2
+Revision ID: 58c3ce431248
 Revises: 
-Create Date: 2025-03-27 17:33:22.044213
+Create Date: 2025-12-23 22:22:45.063671
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '615f3ee0a9d2'
+revision = '58c3ce431248'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,18 +36,21 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
-    op.create_table('account_types',
+    op.create_table('accounts',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
-    sa.Column('category_field', sa.String(length=64), nullable=False),
-    sa.Column('date_field', sa.String(length=64), nullable=False),
-    sa.Column('amount_field', sa.String(length=64), nullable=False),
-    sa.Column('description_field', sa.String(length=128), nullable=False),
+    sa.Column('category_field', sa.String(length=64), nullable=True),
+    sa.Column('date_field', sa.String(length=64), nullable=True),
+    sa.Column('amount_field', sa.String(length=64), nullable=True),
+    sa.Column('description_field', sa.String(length=128), nullable=True),
     sa.Column('family_id', sa.Integer(), nullable=False),
     sa.Column('positive_expense', sa.Boolean(), nullable=True),
+    sa.Column('account_type', sa.Enum('checking', 'savings', 'credit_card', 'retirement', 'brokerage', name='account_type_enum'), nullable=False),
+    sa.Column('retirement_type', sa.Enum('traditional_401k', 'roth_401k', 'traditional_ira', 'roth_ira', 'sep_ira', '403b', name='retirement_type_enum'), nullable=True),
+    sa.Column('initial_balance', sa.Numeric(precision=15, scale=2), nullable=False),
     sa.ForeignKeyConstraint(['family_id'], ['family.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name', 'family_id', name='_accounttype_family_uc')
+    sa.UniqueConstraint('name', 'family_id', name='_account_family_uc')
     )
     op.create_table('category',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -68,6 +71,20 @@ def upgrade():
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
+    op.create_table('account_balance_history',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('account_id', sa.Integer(), nullable=False),
+    sa.Column('balance', sa.Numeric(precision=15, scale=2), nullable=False),
+    sa.Column('as_of_date', sa.Date(), nullable=False),
+    sa.Column('notes', sa.Text(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('account_id', 'as_of_date', name='unique_account_date')
+    )
+    with op.batch_alter_table('account_balance_history', schema=None) as batch_op:
+        batch_op.create_index('idx_account_date', ['account_id', 'as_of_date'], unique=False)
+
     op.create_table('budget',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
@@ -99,7 +116,7 @@ def upgrade():
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.Column('account_id', sa.Integer(), nullable=False),
     sa.Column('is_transfer', sa.Boolean(), nullable=True),
-    sa.ForeignKeyConstraint(['account_id'], ['account_types.id'], ),
+    sa.ForeignKeyConstraint(['account_id'], ['accounts.id'], ),
     sa.ForeignKeyConstraint(['category_id'], ['category.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -120,9 +137,13 @@ def downgrade():
     op.drop_table('transaction')
     op.drop_table('import_rules')
     op.drop_table('budget')
+    with op.batch_alter_table('account_balance_history', schema=None) as batch_op:
+        batch_op.drop_index('idx_account_date')
+
+    op.drop_table('account_balance_history')
     op.drop_table('user')
     op.drop_table('category')
-    op.drop_table('account_types')
+    op.drop_table('accounts')
     op.drop_table('pre_defined_accounts')
     op.drop_table('family')
     # ### end Alembic commands ###

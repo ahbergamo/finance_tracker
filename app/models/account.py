@@ -36,6 +36,7 @@ class Account(db.Model):
     # New fields for account management
     account_type = db.Column(
         db.Enum('checking', 'savings', 'credit_card', 'retirement', 'brokerage',
+                'real_estate', 'vehicle', 'other_asset', 'loan',
                 name='account_type_enum'),
         default='checking',
         nullable=False
@@ -66,7 +67,7 @@ class Account(db.Model):
 
     def is_balance_based(self):
         """Check if this account uses balance snapshot tracking."""
-        return self.account_type in ('retirement', 'brokerage')
+        return self.account_type in ('retirement', 'brokerage', 'real_estate', 'vehicle', 'other_asset', 'loan')
 
 
 # Keep AccountType as an alias for backward compatibility during migration

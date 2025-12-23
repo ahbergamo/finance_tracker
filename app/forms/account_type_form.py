@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, BooleanField, SubmitField, SelectField, DecimalField
+from wtforms import StringField, BooleanField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Optional
+from app.forms.fields import MoneyField
 
 
 class AccountTypeForm(FlaskForm):
@@ -11,7 +12,7 @@ class AccountTypeForm(FlaskForm):
         name (StringField): The name of the account.
         account_type (SelectField): Type of account (checking, savings, credit_card, retirement, brokerage).
         retirement_type (SelectField): Subtype for retirement accounts.
-        initial_balance (DecimalField): Starting balance for the account.
+        initial_balance (MoneyField): Starting balance for the account.
         category_field (StringField): The CSV column that maps to the category.
         date_field (StringField): The CSV column that maps to the date.
         amount_field (StringField): The CSV column that maps to the amount.
@@ -24,13 +25,18 @@ class AccountTypeForm(FlaskForm):
     account_type = SelectField(
         'Account Type',
         choices=[
+            ('', '-- Select Type --'),
             ('checking', 'Checking'),
             ('savings', 'Savings'),
             ('credit_card', 'Credit Card'),
             ('retirement', 'Retirement'),
-            ('brokerage', 'Brokerage')
+            ('brokerage', 'Brokerage'),
+            ('real_estate', 'Real Estate'),
+            ('vehicle', 'Vehicle'),
+            ('other_asset', 'Other Asset'),
+            ('loan', 'Loan'),
         ],
-        default='checking'
+        validators=[DataRequired()]
     )
 
     retirement_type = SelectField(
@@ -47,7 +53,7 @@ class AccountTypeForm(FlaskForm):
         validators=[Optional()]
     )
 
-    initial_balance = DecimalField(
+    initial_balance = MoneyField(
         'Initial Balance',
         places=2,
         default=0,

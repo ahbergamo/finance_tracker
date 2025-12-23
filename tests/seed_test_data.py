@@ -83,6 +83,19 @@ def seed_db_for_tests():
             positive_expense=True,
             account_type='credit_card'
         ),
+        Account(
+            name="Fidelity 401k",
+            family_id=family1.id,
+            account_type='retirement',
+            retirement_type='traditional_401k',
+            initial_balance=50000.00
+        ),
+        Account(
+            name="Vanguard Brokerage",
+            family_id=family1.id,
+            account_type='brokerage',
+            initial_balance=25000.00
+        ),
     ]
     db.session.bulk_save_objects(account_types1)
     db.session.commit()

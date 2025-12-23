@@ -44,40 +44,7 @@ DEFAULT_ACCOUNT_TYPES = [
         "description_field": "Name",
         "positive_expense": False,
     },
-    # 401k Retirement Account
-    {
-        "name": "401k Account",
-        "category_field": "Type",
-        "date_field": "Date",
-        "amount_field": "Amount",
-        "description_field": "Description",
-        "positive_expense": False,
-    },
-    # Traditional IRA
-    {
-        "name": "Traditional IRA",
-        "category_field": "Type",
-        "date_field": "Date",
-        "amount_field": "Amount",
-        "description_field": "Description",
-        "positive_expense": False,
-    },
-    # Roth IRA
-    {
-        "name": "Roth IRA",
-        "category_field": "Type",
-        "date_field": "Date",
-        "amount_field": "Amount",
-        "description_field": "Description",
-        "positive_expense": False,
-    },
-    # 403b Retirement Account
-    {
-        "name": "403b Account",
-        "category_field": "Type",
-        "date_field": "Date",
-        "amount_field": "Amount",
-        "description_field": "Description",
-        "positive_expense": False,
-    }
+    # Note: Retirement accounts (401k, IRA, 403b) and brokerage accounts use balance-based
+    # tracking instead of CSV imports, so they are not included as pre-defined account types.
+    # Users create these manually and enter balance snapshots via the Balance History feature.
 ]
