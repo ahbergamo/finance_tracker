@@ -373,7 +373,7 @@ transactions = Transaction.query.join(Transaction.category).filter(
 3. **Limited Asset Tracking**: Only transaction-based accounts
    - Cannot track retirement accounts (need periodic balance snapshots)
    - Cannot track brokerage accounts or physical assets
-   - **Resolution**: See [account-management.md](account-management.md) for balance-based accounts
+   - **Resolution**: See [account-management.md](account-management.md) for balance-based accounts and net worth tracking
 
 4. **No Reconciliation**: No bank statement reconciliation feature
    - Cannot mark transactions as "cleared" or "reconciled"
@@ -401,11 +401,11 @@ The following features are planned or under consideration:
    - Retirement goal projections
    - See [retirement-accounts.md](retirement-accounts.md)
 
-3. **Asset Management** (🟡 Draft)
-   - Track physical assets (home, vehicles, valuables)
-   - Uses same balance history pattern as retirement/brokerage
+3. **Asset Management** (✅ Implemented in Account Management)
+   - Track physical assets (real estate, vehicles, other assets)
+   - Uses balance history pattern for periodic valuations
    - Net worth calculation across all accounts
-   - See [asset-management.md](asset-management.md)
+   - See [account-management.md](account-management.md)
 
 4. **Advanced Reporting**
    - Tax category reporting

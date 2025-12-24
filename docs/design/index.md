@@ -24,7 +24,6 @@ Design documents help us:
 ### Planned Enhancements
 
 - [Retirement Accounts Enhancement](retirement-accounts.md) - Advanced retirement tracking with contribution goals and projections (🟡 Draft, depends on Account Management)
-- [Asset Management](asset-management.md) - Track physical assets and net worth (🟡 Draft)
 
 ### Document Dependencies
 
@@ -33,8 +32,7 @@ transaction-management.md (✅ Implemented)
     ↓
 account-management.md (🔵 In Review) ← We are here
     ↓
-    ├─→ retirement-accounts.md (🟡 Draft)
-    └─→ asset-management.md (🟡 Draft)
+    └─→ retirement-accounts.md (🟡 Draft)
 ```
 
 ## Design Document Template

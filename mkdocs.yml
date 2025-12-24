@@ -70,7 +70,6 @@ nav:
       - Transaction Management: design/transaction-management.md
       - Account Management: design/account-management.md
       - Retirement Accounts: design/retirement-accounts.md
-      - Asset Management: design/asset-management.md
   - Contributing: contributing.md
   - Changelog: changelog.md
 
